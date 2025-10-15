@@ -127,18 +127,17 @@
                     </div>
 
                     <div class="bg-white rounded-lg p-6 shadow-md">
-                        <h3 class="text-lg font-semibold mb-4 text-gray-700">ข่าวประกาศ</h3>
-                        <div class="space-y-2">
-                            <div class="p-3 bg-orange-50 rounded border-l-4 border-orange-400">
-                                <p class="text-sm">🎉 เมนูใหม่! ข้าวผัดพะเยาราม พิเศษ 20 บาท</p>
-                            </div>
-                            <div class="p-3 bg-blue-50 rounded border-l-4 border-blue-400">
-                                <p class="text-sm">📢 โปรโมชั่นสมาชิก ลด 10% ทุกเมนู</p>
-                            </div>
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-semibold text-gray-700">ข่าวประกาศ</h3>
+                            <button id="editAnnouncementsBtn" onclick="editAnnouncements()" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm hidden">
+                                แก้ไข
+                            </button>
+                        </div>
+                        <div id="announcementsContainer" class="space-y-2">
+                           <!-- Announcements will be rendered here by JS -->
                         </div>
                     </div>
                     
-                    <!-- Buttons removed from homepage, manual sync is no longer the primary method -->
                 </div>
 
                 <!-- Add Product Page (Admin Only) -->
@@ -376,6 +375,10 @@
         let products = [];
         let members = [];
         let sales = [];
+        let announcements = {
+            promo1: "🎉 เมนูใหม่! ข้าวผัดพะเยาราม พิเศษ 45 บาท",
+            promo2: "📢 โปรโมชั่นสมาชิก ลด 10% ทุกเมนู"
+        };
         let salesChartInstance = null;
         
         const users = {
@@ -474,7 +477,7 @@
 
         // --- DATA SYNCING ---
         function syncDataToGoogleSheets() {
-            const data = { products, members, sales, timestamp: new Date().toISOString(), savedBy: currentUser };
+            const data = { products, members, sales, announcements, timestamp: new Date().toISOString(), savedBy: currentUser };
             const callbackName = 'jsonpCallback_sync_' + Date.now();
             window[callbackName] = function(response) {
                 document.head.removeChild(script);
@@ -508,6 +511,9 @@
                     products = response.data.products || [];
                     members = response.data.members || [];
                     sales = response.data.sales || [];
+                    if (response.data.announcements) {
+                        announcements = response.data.announcements;
+                    }
                     refreshUI();
                     if (isManualRefresh) {
                         Swal.fire({ icon: 'success', title: 'โหลดข้อมูลสำเร็จ!', timer: 1500, showConfirmButton: false });
@@ -771,7 +777,73 @@
             updateDashboard();
             updateSalesReport();
             updateMySalesHistory();
+            displayAnnouncements();
         }
+        
+        function displayAnnouncements() {
+            const container = document.getElementById('announcementsContainer');
+            if (!container) return;
+            container.innerHTML = `
+                <div class="p-3 bg-orange-50 rounded border-l-4 border-orange-400">
+                    <p class="text-sm">${announcements.promo1}</p>
+                </div>
+                <div class="p-3 bg-blue-50 rounded border-l-4 border-blue-400">
+                    <p class="text-sm">${announcements.promo2}</p>
+                </div>
+            `;
+            const editBtn = document.getElementById('editAnnouncementsBtn');
+            if (editBtn) {
+                if (userRole === 'admin') {
+                    editBtn.classList.remove('hidden');
+                } else {
+                    editBtn.classList.add('hidden');
+                }
+            }
+        }
+
+        function editAnnouncements() {
+            if (userRole !== 'admin') {
+                showAlert('คุณไม่มีสิทธิ์แก้ไข', 'error');
+                return;
+            }
+            Swal.fire({
+                title: 'แก้ไขข่าวประกาศ',
+                html: `
+                    <div class="space-y-4 text-left">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">ประกาศ 1 (สีส้ม)</label>
+                            <input id="swal-promo1" class="swal2-input w-full" value="${announcements.promo1}">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">ประกาศ 2 (สีฟ้า)</label>
+                            <input id="swal-promo2" class="swal2-input w-full" value="${announcements.promo2}">
+                        </div>
+                    </div>
+                `,
+                focusConfirm: false,
+                showCancelButton: true,
+                confirmButtonText: 'บันทึก',
+                cancelButtonText: 'ยกเลิก',
+                preConfirm: () => {
+                    const promo1 = document.getElementById('swal-promo1').value;
+                    const promo2 = document.getElementById('swal-promo2').value;
+                    if (!promo1 || !promo2) {
+                        Swal.showValidationMessage(`กรุณากรอกข้อมูลให้ครบถ้วน`);
+                        return false;
+                    }
+                    return { promo1, promo2 };
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    announcements.promo1 = result.value.promo1;
+                    announcements.promo2 = result.value.promo2;
+                    syncDataToGoogleSheets();
+                    displayAnnouncements();
+                    Swal.fire('บันทึกแล้ว!', 'ข่าวประกาศถูกอัปเดตแล้ว', 'success');
+                }
+            });
+        }
+
 
         function loadProductOptions() {
             const select = document.getElementById('productSelect');
@@ -919,3 +991,4 @@
     </script>
 </body>
 </html>
+
