@@ -343,18 +343,22 @@
                     <div class="bg-white rounded-lg p-6 shadow-md">
                         <h2 class="text-2xl font-bold mb-6 text-gray-800">ประวัติการขาย</h2>
                         <div class="mb-4">
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+                                    <h3 class="text-sm font-medium text-yellow-700">ยอดขายรวม (ของฉัน)</h3>
+                                    <p class="text-2xl font-bold text-yellow-600" id="myTotalSales">฿0</p>
+                                </div>
                                 <div class="bg-green-50 p-4 rounded-lg border border-green-200">
-                                    <h3 class="text-sm font-medium text-green-700">ยอดขายวันนี้ (ของฉัน)</h3>
-                                    <p class="text-2xl font-bold text-green-600" id="mySalesToday">฿0</p>
+                                    <h3 class="text-sm font-medium text-green-700">ยอดขายเงินสด (รวม)</h3>
+                                    <p class="text-2xl font-bold text-green-600" id="myTotalCashSales">฿0</p>
+                                </div>
+                                <div class="bg-sky-50 p-4 rounded-lg border border-sky-200">
+                                    <h3 class="text-sm font-medium text-sky-700">ยอดขายโอน (รวม)</h3>
+                                    <p class="text-2xl font-bold text-sky-600" id="myTotalTransferSales">฿0</p>
                                 </div>
                                 <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
                                     <h3 class="text-sm font-medium text-blue-700">จำนวนรายการ (วันนี้)</h3>
                                     <p class="text-2xl font-bold text-blue-600" id="myOrdersToday">0</p>
-                                </div>
-                                <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
-                                    <h3 class="text-sm font-medium text-yellow-700">ยอดขายรวม (ของฉัน)</h3>
-                                    <p class="text-2xl font-bold text-yellow-600" id="myTotalSales">฿0</p>
                                 </div>
                             </div>
                         </div>
@@ -983,17 +987,47 @@
         function updateMySalesHistory() {
             if (userRole === 'admin') return;
             const mySales = sales.filter(s => s.soldBy === currentUser);
+
+            // Calculate totals
+            const totalSales = mySales.reduce((sum, s) => sum + s.total, 0);
+            const totalCashSales = mySales.filter(s => s.paymentMethod === 'เงินสด' || !s.paymentMethod).reduce((sum, s) => sum + s.total, 0);
+            const totalTransferSales = mySales.filter(s => s.paymentMethod === 'โอน').reduce((sum, s) => sum + s.total, 0);
             const todaySales = mySales.filter(s => new Date(s.date).toDateString() === new Date().toDateString());
-            document.getElementById('mySalesToday').textContent = `฿${todaySales.reduce((sum, s) => sum + s.total, 0)}`;
+            
+            // Update summary cards
+            document.getElementById('myTotalSales').textContent = `฿${totalSales}`;
+            document.getElementById('myTotalCashSales').textContent = `฿${totalCashSales}`;
+            document.getElementById('myTotalTransferSales').textContent = `฿${totalTransferSales}`;
             document.getElementById('myOrdersToday').textContent = todaySales.length;
-            document.getElementById('myTotalSales').textContent = `฿${mySales.reduce((sum, s) => sum + s.total, 0)}`;
+            
+            // Update sales list
             const list = document.getElementById('mySalesList');
             list.innerHTML = '';
             const recent = mySales.slice(-20).reverse();
             recent.forEach(s => {
                 const div = document.createElement('div');
                 div.className = 'p-4 bg-gray-50 rounded border';
-                div.innerHTML = `<div class="flex flex-col sm:flex-row justify-between sm:items-start space-y-2 sm:space-y-0"><div><h4 class="font-medium">ลูกค้า: ${s.memberName}</h4><p class="text-sm text-gray-600">${s.items.map(i => `${i.name} x${i.quantity}`).join(', ')}</p></div><div class="text-left sm:text-right flex-shrink-0"><p class="font-bold text-green-600">฿${s.total}</p><p class="text-xs text-gray-500">${new Date(s.date).toLocaleString('th-TH')}</p></div></div>`;
+                
+                // Add a badge for payment method
+                const paymentMethod = s.paymentMethod || 'เงินสด'; // Default to cash for old records
+                const paymentBadge = paymentMethod === 'โอน' 
+                    ? `<span class="text-xs font-medium bg-sky-100 text-sky-800 px-2 py-0.5 rounded-full">โอน</span>`
+                    : `<span class="text-xs font-medium bg-green-100 text-green-800 px-2 py-0.5 rounded-full">เงินสด</span>`;
+
+                div.innerHTML = `
+                    <div class="flex flex-col sm:flex-row justify-between sm:items-start space-y-2 sm:space-y-0">
+                        <div>
+                            <h4 class="font-medium">ลูกค้า: ${s.memberName}</h4>
+                            <p class="text-sm text-gray-600">${s.items.map(i => `${i.name} x${i.quantity}`).join(', ')}</p>
+                        </div>
+                        <div class="text-left sm:text-right flex-shrink-0">
+                            <p class="font-bold text-green-600">฿${s.total}</p>
+                            <div class="flex items-center justify-start sm:justify-end space-x-2 mt-1">
+                                ${paymentBadge}
+                                <p class="text-xs text-gray-500">${new Date(s.date).toLocaleString('th-TH')}</p>
+                            </div>
+                        </div>
+                    </div>`;
                 list.appendChild(div);
             });
             if (recent.length === 0) { list.innerHTML = '<p class="text-gray-500 text-center py-4">ยังไม่มีประวัติการขาย</p>'; }
