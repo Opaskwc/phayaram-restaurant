@@ -434,8 +434,22 @@
                 document.getElementById('generateDescBtn').disabled = !e.target.value.trim();
             });
             setupSidebarControls();
+            document.querySelectorAll('input[name="paymentMethod"]').forEach(radio => {
+                radio.addEventListener('change', handlePaymentMethodChange);
+            });
         });
         
+        function handlePaymentMethodChange() {
+            const isTransfer = document.getElementById('paymentTransfer').checked;
+            if (isTransfer) {
+                const totalText = document.getElementById('totalAmount').textContent;
+                const total = parseFloat(totalText.replace(/[^\d.-]/g, '')) || 0;
+                const paidAmountInput = document.getElementById('paidAmount');
+                paidAmountInput.value = total;
+                calculateChange();
+            }
+        }
+
         function setupSidebarControls(){
             const sidebar = document.getElementById('sidebar');
             const mainContent = document.getElementById('mainContent');
@@ -871,6 +885,7 @@
             });
             document.getElementById('totalAmount').textContent = `฿${total}`;
             calculateChange();
+            handlePaymentMethodChange(); 
         }
 
         function removeFromCart(index) { currentCart.splice(index, 1); displayCart(); }
