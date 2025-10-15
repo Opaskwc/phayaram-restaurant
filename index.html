@@ -24,11 +24,15 @@
         .swal2-popup {
             font-family: 'Sarabun', sans-serif !important;
         }
+        /* For smooth transitions */
+        #sidebar, #mainContent {
+            transition: all 0.3s ease-in-out;
+        }
     </style>
 </head>
 <body class="bg-orange-100 font-sans">
     <!-- Login Page -->
-    <div id="loginPage" class="min-h-full flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div id="loginPage" class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div class="max-w-md w-full space-y-8">
             <div class="text-center">
                 <h1 class="text-4xl font-bold text-orange-600 mb-2">🍜</h1>
@@ -61,308 +65,330 @@
     </div>
 
     <!-- Main App -->
-    <div id="mainApp" class="flex h-full min-h-full hidden">
+    <div id="mainApp" class="flex h-screen bg-gray-100 hidden">
         <!-- Sidebar -->
-        <div class="w-64 sidebar-gradient text-white shadow-lg">
-            <div class="p-6">
-                <h1 class="text-xl font-bold mb-4">🍜 ระบบร้านอาหารพะเยาราม</h1>
+        <div id="sidebar" class="fixed inset-y-0 left-0 z-30 w-64 sidebar-gradient text-white shadow-lg transform -translate-x-full md:relative md:translate-x-0 flex flex-col">
+            <div class="p-6 flex-shrink-0">
+                <h1 class="text-xl font-bold mb-4 nav-text">🍜 ระบบร้านอาหารพะเยาราม</h1>
                 <div class="mb-6 p-3 bg-orange-600 rounded-lg">
                     <p class="text-sm">ผู้ใช้: <span id="currentUser" class="font-medium"></span></p>
-                    <p class="text-xs opacity-75">สิทธิ์: <span id="currentRole" class="font-medium"></span></p>
+                    <p class="text-xs opacity-75 nav-text">สิทธิ์: <span id="currentRole" class="font-medium"></span></p>
                 </div>
-                <nav class="space-y-2" id="navigation">
-                    <!-- Navigation will be populated based on user role -->
-                </nav>
-                <button onclick="logout()" class="w-full mt-6 bg-red-500 hover:bg-red-600 text-white p-3 rounded-lg transition-colors">
-                    ออกจากระบบ
+            </div>
+
+            <nav class="flex-1 px-4 space-y-2 overflow-y-auto" id="navigation">
+                <!-- Navigation links populated by JS -->
+            </nav>
+
+            <div class="px-4 pb-4 mt-auto flex-shrink-0">
+                <button id="desktopSidebarToggler" class="w-full p-3 rounded-lg hover:bg-orange-600 hidden md:flex items-center">
+                    <svg id="desktopTogglerIcon" class="w-6 h-6 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"></path></svg>
+                    <span class="nav-text ml-2">ย่อเมนู</span>
+                </button>
+                <button onclick="logout()" class="w-full mt-2 bg-red-500 hover:bg-red-600 text-white p-3 rounded-lg flex items-center justify-center">
+                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                    <span class="nav-text ml-2">ออกจากระบบ</span>
                 </button>
             </div>
         </div>
 
         <!-- Main Content -->
-        <div class="flex-1 p-6">
-            <!-- Home Page -->
-            <div id="homePage" class="page">
-                <div class="gradient-orange rounded-lg p-6 mb-6">
-                    <h2 class="text-2xl font-bold text-white mb-4">ยินดีต้อนรับสู่ระบบร้านอาหารพะเยาราม</h2>
-                    <p class="text-orange-100">จัดการร้านอาหารของคุณได้อย่างง่ายดาย</p>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                    <div class="bg-white rounded-lg p-6 shadow-md">
-                        <h3 class="text-lg font-semibold mb-2 text-gray-700">ยอดขายวันนี้</h3>
-                        <p class="text-3xl font-bold text-green-600" id="todaySales">฿0</p>
-                    </div>
-                    <div class="bg-white rounded-lg p-6 shadow-md">
-                        <h3 class="text-lg font-semibold mb-2 text-gray-700">จำนวนสมาชิก</h3>
-                        <p class="text-3xl font-bold text-blue-600" id="memberCount">0</p>
-                    </div>
-                    <div class="bg-white rounded-lg p-6 shadow-md">
-                        <h3 class="text-lg font-semibold mb-2 text-gray-700">จำนวนสินค้า</h3>
-                        <p class="text-3xl font-bold text-yellow-600" id="productCount">0</p>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-lg p-6 shadow-md">
-                    <h3 class="text-lg font-semibold mb-4 text-gray-700">ข่าวประกาศ</h3>
-                    <div class="space-y-2">
-                        <div class="p-3 bg-orange-50 rounded border-l-4 border-orange-400">
-                            <p class="text-sm">🎉 เมนูใหม่! ข้าวผัดพะเยาราม พิเศษ 20 บาท</p>
-                        </div>
-                        <div class="p-3 bg-blue-50 rounded border-l-4 border-blue-400">
-                            <p class="text-sm">📢 โปรโมชั่นสมาชิก ลด 10% ทุกเมนู</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-lg p-6 shadow-md mt-6">
-                    <h3 class="text-lg font-semibold mb-4 text-gray-700">จัดการข้อมูล Google Sheets</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <button onclick="saveToGoogleSheets()" class="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg transition-colors flex items-center justify-center space-x-2">
-                            <span>💾</span>
-                            <span>บันทึกข้อมูลใน Google Sheet</span>
-                        </button>
-                        <button onclick="loadFromGoogleSheets()" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg transition-colors flex items-center justify-center space-x-2">
-                            <span>📊</span>
-                            <span>เรียกดูข้อมูล Google Sheet</span>
-                        </button>
-                    </div>
-                    <div class="mt-4 p-3 bg-gray-50 rounded-lg">
-                        <p class="text-sm text-gray-600">
-                            <strong>หมายเหตุ:</strong> ข้อมูลจะถูกบันทึกใน Local Storage อัตโนมัติ และสามารถซิงค์กับ Google Sheets ได้
-                        </p>
-                    </div>
-                </div>
+        <div id="mainContent" class="flex-1 flex flex-col w-full md:w-auto">
+             <!-- Mobile Header -->
+            <div class="md:hidden flex justify-between items-center bg-white p-4 shadow-md sticky top-0 z-10">
+                <h1 class="text-lg font-bold text-orange-600">🍜 พะเยาราม</h1>
+                <button id="mobileHamburgerBtn" aria-label="Open Menu">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                </button>
             </div>
 
-            <!-- Add Product Page (Admin Only) -->
-            <div id="addProductPage" class="page hidden">
-                <div class="bg-white rounded-lg p-6 shadow-md">
-                    <h2 class="text-2xl font-bold mb-6 text-gray-800">เพิ่มสินค้าใหม่</h2>
-                    <form id="productForm" class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">ชื่อสินค้า</label>
-                            <input type="text" id="productName" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" required>
+            <!-- Content Area -->
+            <div class="flex-1 p-4 md:p-6 overflow-y-auto">
+                 <!-- Home Page -->
+                <div id="homePage" class="page">
+                    <div class="gradient-orange rounded-lg p-6 mb-6">
+                        <h2 class="text-2xl font-bold text-white mb-4">ยินดีต้อนรับสู่ระบบร้านอาหารพะเยาราม</h2>
+                        <p class="text-orange-100">จัดการร้านอาหารของคุณได้อย่างง่ายดาย</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                        <div class="bg-white rounded-lg p-6 shadow-md">
+                            <h3 class="text-lg font-semibold mb-2 text-gray-700">ยอดขายวันนี้</h3>
+                            <p class="text-3xl font-bold text-green-600" id="todaySales">฿0</p>
                         </div>
-                        <div>
-                            <div class="flex justify-between items-center mb-2">
-                                <label class="block text-sm font-medium text-gray-700">คำอธิบายอาหาร</label>
-                                <button type="button" id="generateDescBtn" onclick="generateDescription()" class="text-sm text-orange-600 hover:text-orange-800 font-medium flex items-center space-x-1 disabled:opacity-50" disabled>
-                                    <span>✨ สร้างอัตโนมัติ</span>
-                                    <svg id="descSpinner" class="animate-spin h-4 w-4 text-orange-600 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                       <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                       <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                    </svg>
-                                </button>
-                           </div>
-                            <textarea id="productDescription" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" rows="3"></textarea>
+                        <div class="bg-white rounded-lg p-6 shadow-md">
+                            <h3 class="text-lg font-semibold mb-2 text-gray-700">จำนวนสมาชิก</h3>
+                            <p class="text-3xl font-bold text-blue-600" id="memberCount">0</p>
                         </div>
+                        <div class="bg-white rounded-lg p-6 shadow-md">
+                            <h3 class="text-lg font-semibold mb-2 text-gray-700">จำนวนสินค้า</h3>
+                            <p class="text-3xl font-bold text-yellow-600" id="productCount">0</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg p-6 shadow-md">
+                        <h3 class="text-lg font-semibold mb-4 text-gray-700">ข่าวประกาศ</h3>
+                        <div class="space-y-2">
+                            <div class="p-3 bg-orange-50 rounded border-l-4 border-orange-400">
+                                <p class="text-sm">🎉 เมนูใหม่! ข้าวผัดพะเยาราม พิเศษ 45 บาท</p>
+                            </div>
+                            <div class="p-3 bg-blue-50 rounded border-l-4 border-blue-400">
+                                <p class="text-sm">📢 โปรโมชั่นสมาชิก ลด 10% ทุกเมนู</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg p-6 shadow-md mt-6">
+                        <h3 class="text-lg font-semibold mb-4 text-gray-700">จัดการข้อมูล Google Sheets</h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">ราคา (บาท)</label>
-                                <input type="number" id="productPrice" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" required>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">จำนวนคงเหลือ</label>
-                                <input type="number" id="productStock" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" required>
-                            </div>
-                        </div>
-                        <div class="flex space-x-4">
-                            <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg transition-colors flex-1">
-                                บันทึกสินค้า
+                            <button onclick="saveToGoogleSheets()" class="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg transition-colors flex items-center justify-center space-x-2">
+                                <span>💾</span>
+                                <span>บันทึกข้อมูลใน Google Sheet</span>
                             </button>
-                            <button type="button" onclick="saveProductsToGoogleSheets()" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg transition-colors flex items-center space-x-2">
+                            <button onclick="loadFromGoogleSheets()" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg transition-colors flex items-center justify-center space-x-2">
                                 <span>📊</span>
-                                <span>บันทึกใน Google Sheets</span>
+                                <span>เรียกดูข้อมูล Google Sheet</span>
                             </button>
                         </div>
-                    </form>
+                        <div class="mt-4 p-3 bg-gray-50 rounded-lg">
+                            <p class="text-sm text-gray-600">
+                                <strong>หมายเหตุ:</strong> ข้อมูลจะถูกบันทึกใน Local Storage อัตโนมัติ และสามารถซิงค์กับ Google Sheets ได้
+                            </p>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="bg-white rounded-lg p-6 shadow-md mt-6">
-                    <h3 class="text-lg font-semibold mb-4 text-gray-700">รายการสินค้า</h3>
-                    <div id="productList" class="space-y-2"></div>
-                </div>
-            </div>
-
-            <!-- Payment Page -->
-            <div id="paymentPage" class="page hidden">
-                <div class="bg-white rounded-lg p-6 shadow-md">
-                    <h2 class="text-2xl font-bold mb-6 text-gray-800">ชำระเงิน</h2>
-                    <form id="paymentForm" class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">เลือกสมาชิก</label>
-                            <select id="memberSelect" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500">
-                                <option value="">เลือกสมาชิก</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">เลือกรายการอาหาร</label>
-                            <select id="productSelect" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500">
-                                <option value="">เลือกอาหาร</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">จำนวน</label>
-                            <input type="number" id="quantity" value="1" min="1" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500">
-                        </div>
-                        <button type="button" onclick="addToCart()" class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg transition-colors">
-                            เพิ่มลงตะกร้า
-                        </button>
-                    </form>
-
-                    <div class="mt-6">
-                        <h3 class="text-lg font-semibold mb-4 text-gray-700">ตะกร้าสินค้า</h3>
-                        <div id="cart" class="space-y-2 mb-4"></div>
-                        <div class="border-t pt-4">
-                            <div class="flex justify-between items-center mb-4">
-                                <span class="text-lg font-semibold">ยอดรวม:</span>
-                                <span class="text-xl font-bold text-green-600" id="totalAmount">฿0</span>
+                <!-- Add Product Page (Admin Only) -->
+                <div id="addProductPage" class="page hidden">
+                    <div class="bg-white rounded-lg p-6 shadow-md">
+                        <h2 class="text-2xl font-bold mb-6 text-gray-800">จัดการสินค้า</h2>
+                        <form id="productForm" class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">ชื่อสินค้า</label>
+                                <input type="text" id="productName" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" required>
                             </div>
-                            
-                            <div class="mb-4">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">วิธีการชำระเงิน</label>
-                                <div class="flex items-center space-x-4">
-                                    <div class="flex items-center">
-                                        <input id="paymentCash" name="paymentMethod" type="radio" value="เงินสด" class="focus:ring-orange-500 h-4 w-4 text-orange-600 border-gray-300" checked>
-                                        <label for="paymentCash" class="ml-2 block text-sm text-gray-900">
-                                            เงินสด
-                                        </label>
-                                    </div>
-                                    <div class="flex items-center">
-                                        <input id="paymentTransfer" name="paymentMethod" type="radio" value="โอน" class="focus:ring-orange-500 h-4 w-4 text-orange-600 border-gray-300">
-                                        <label for="paymentTransfer" class="ml-2 block text-sm text-gray-900">
-                                            โอน
-                                        </label>
-                                    </div>
-                                </div>
+                            <div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <label class="block text-sm font-medium text-gray-700">คำอธิบายอาหาร</label>
+                                    <button type="button" id="generateDescBtn" onclick="generateDescription()" class="text-sm text-orange-600 hover:text-orange-800 font-medium flex items-center space-x-1 disabled:opacity-50" disabled>
+                                        <span>✨ สร้างอัตโนมัติ</span>
+                                        <svg id="descSpinner" class="animate-spin h-4 w-4 text-orange-600 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                           <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                    </button>
+                               </div>
+                                <textarea id="productDescription" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" rows="3"></textarea>
                             </div>
-
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">จำนวนเงินที่จ่าย</label>
-                                    <input type="number" id="paidAmount" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" oninput="calculateChange()">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">ราคา (บาท)</label>
+                                    <input type="number" id="productPrice" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" required>
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">เงินทอน</label>
-                                    <input type="text" id="changeAmount" class="w-full p-3 border border-gray-300 rounded-lg bg-gray-100" readonly>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">จำนวนคงเหลือ</label>
+                                    <input type="number" id="productStock" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" required>
                                 </div>
                             </div>
-                            <button onclick="confirmPayment()" class="w-full bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg transition-colors mt-4">
-                                ยืนยันชำระเงิน
+                            <div class="flex space-x-4">
+                                <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg transition-colors flex-1">
+                                    บันทึกสินค้า
+                                </button>
+                                <button type="button" onclick="saveProductsToGoogleSheets()" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg transition-colors flex items-center space-x-2">
+                                    <span>📊</span>
+                                    <span>บันทึกใน Google Sheets</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="bg-white rounded-lg p-6 shadow-md mt-6">
+                        <h3 class="text-lg font-semibold mb-4 text-gray-700">รายการสินค้า</h3>
+                        <div id="productList" class="space-y-2"></div>
+                    </div>
+                </div>
+
+                <!-- Payment Page -->
+                <div id="paymentPage" class="page hidden">
+                    <div class="bg-white rounded-lg p-6 shadow-md">
+                        <h2 class="text-2xl font-bold mb-6 text-gray-800">ชำระเงิน</h2>
+                        <form id="paymentForm" class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">เลือกสมาชิก</label>
+                                <select id="memberSelect" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500">
+                                    <option value="">เลือกสมาชิก</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">เลือกรายการอาหาร</label>
+                                <select id="productSelect" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500">
+                                    <option value="">เลือกอาหาร</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">จำนวน</label>
+                                <input type="number" id="quantity" value="1" min="1" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500">
+                            </div>
+                            <button type="button" onclick="addToCart()" class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg transition-colors">
+                                เพิ่มลงตะกร้า
                             </button>
+                        </form>
+
+                        <div class="mt-6">
+                            <h3 class="text-lg font-semibold mb-4 text-gray-700">ตะกร้าสินค้า</h3>
+                            <div id="cart" class="space-y-2 mb-4"></div>
+                            <div class="border-t pt-4">
+                                <div class="flex justify-between items-center mb-4">
+                                    <span class="text-lg font-semibold">ยอดรวม:</span>
+                                    <span class="text-xl font-bold text-green-600" id="totalAmount">฿0</span>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">วิธีการชำระเงิน</label>
+                                    <div class="flex items-center space-x-4">
+                                        <div class="flex items-center">
+                                            <input id="paymentCash" name="paymentMethod" type="radio" value="เงินสด" class="focus:ring-orange-500 h-4 w-4 text-orange-600 border-gray-300" checked>
+                                            <label for="paymentCash" class="ml-2 block text-sm text-gray-900">
+                                                เงินสด
+                                            </label>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <input id="paymentTransfer" name="paymentMethod" type="radio" value="โอน" class="focus:ring-orange-500 h-4 w-4 text-orange-600 border-gray-300">
+                                            <label for="paymentTransfer" class="ml-2 block text-sm text-gray-900">
+                                                โอน
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">จำนวนเงินที่จ่าย</label>
+                                        <input type="number" id="paidAmount" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" oninput="calculateChange()">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">เงินทอน</label>
+                                        <input type="text" id="changeAmount" class="w-full p-3 border border-gray-300 rounded-lg bg-gray-100" readonly>
+                                    </div>
+                                </div>
+                                <button onclick="confirmPayment()" class="w-full bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg transition-colors mt-4">
+                                    ยืนยันชำระเงิน
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Add Member Page (Admin Only) -->
-            <div id="addMemberPage" class="page hidden">
-                <div class="bg-white rounded-lg p-6 shadow-md">
-                    <h2 class="text-2xl font-bold mb-6 text-gray-800">เพิ่มสมาชิกใหม่</h2>
-                    <form id="memberForm" class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">รหัสพนักงาน</label>
-                            <input type="text" id="employeeId" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" required>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Add Member Page (Admin Only) -->
+                <div id="addMemberPage" class="page hidden">
+                    <div class="bg-white rounded-lg p-6 shadow-md">
+                        <h2 class="text-2xl font-bold mb-6 text-gray-800">จัดการสมาชิก</h2>
+                        <form id="memberForm" class="space-y-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">ชื่อ</label>
-                                <input type="text" id="firstName" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" required>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">รหัสพนักงาน</label>
+                                <input type="text" id="employeeId" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" required>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">ชื่อ</label>
+                                    <input type="text" id="firstName" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">นามสกุล</label>
+                                    <input type="text" id="lastName" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" required>
+                                </div>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">นามสกุล</label>
-                                <input type="text" id="lastName" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" required>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">แผนก</label>
+                                <input type="text" id="department" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" required>
                             </div>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">แผนก</label>
-                            <input type="text" id="department" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" required>
-                        </div>
-                        <div class="flex space-x-4">
-                            <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg transition-colors flex-1">
-                                เพิ่มสมาชิก
-                            </button>
-                            <button type="button" onclick="saveMembersToGoogleSheets()" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg transition-colors flex items-center space-x-2">
+                            <div class="flex space-x-4">
+                                <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg transition-colors flex-1">
+                                    เพิ่มสมาชิก
+                                </button>
+                                <button type="button" onclick="saveMembersToGoogleSheets()" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg transition-colors flex items-center space-x-2">
+                                    <span>📊</span>
+                                    <span>บันทึกใน Google Sheets</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="bg-white rounded-lg p-6 shadow-md mt-6">
+                        <h3 class="text-lg font-semibold mb-4 text-gray-700">รายการสมาชิก</h3>
+                        <div id="memberList" class="space-y-2"></div>
+                    </div>
+                </div>
+
+                <!-- Sales Report Page (Admin Only) -->
+                <div id="salesReportPage" class="page hidden">
+                    <div class="bg-white rounded-lg p-6 shadow-md mb-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-2xl font-bold text-gray-800">รายงานยอดขาย</h2>
+                            <button onclick="saveSalesReportToGoogleSheets()" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg transition-colors flex items-center space-x-2">
                                 <span>📊</span>
-                                <span>บันทึกใน Google Sheets</span>
+                                <span>บันทึกรายงานใน Google Sheets</span>
                             </button>
                         </div>
-                    </form>
-                </div>
-
-                <div class="bg-white rounded-lg p-6 shadow-md mt-6">
-                    <h3 class="text-lg font-semibold mb-4 text-gray-700">รายการสมาชิก</h3>
-                    <div id="memberList" class="space-y-2"></div>
-                </div>
-            </div>
-
-            <!-- Sales Report Page (Admin Only) -->
-            <div id="salesReportPage" class="page hidden">
-                <div class="bg-white rounded-lg p-6 shadow-md mb-6">
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-2xl font-bold text-gray-800">รายงานยอดขาย</h2>
-                        <button onclick="saveSalesReportToGoogleSheets()" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg transition-colors flex items-center space-x-2">
-                            <span>📊</span>
-                            <span>บันทึกรายงานใน Google Sheets</span>
-                        </button>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                        <div class="bg-green-50 p-4 rounded-lg border border-green-200">
-                            <h3 class="text-sm font-medium text-green-700">ยอดขายวันนี้</h3>
-                            <p class="text-2xl font-bold text-green-600" id="reportTodaySales">฿0</p>
-                        </div>
-                        <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                            <h3 class="text-sm font-medium text-blue-700">ยอดขายสัปดาห์นี้</h3>
-                            <p class="text-2xl font-bold text-blue-600" id="reportWeeklySales">฿0</p>
-                        </div>
-                        <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
-                            <h3 class="text-sm font-medium text-yellow-700">ยอดขายเดือนนี้</h3>
-                            <p class="text-2xl font-bold text-yellow-600" id="reportMonthlySales">฿0</p>
-                        </div>
-                        <div class="bg-purple-50 p-4 rounded-lg border border-purple-200">
-                            <h3 class="text-sm font-medium text-purple-700">จำนวนสมาชิก</h3>
-                            <p class="text-2xl font-bold text-purple-600" id="reportMemberCount">0</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-white rounded-lg p-6 shadow-md">
-                        <h3 class="text-lg font-semibold mb-4 text-gray-700">กราฟยอดขาย</h3>
-                        <canvas id="salesChart" width="400" height="200"></canvas>
-                    </div>
-                    <div class="bg-white rounded-lg p-6 shadow-md">
-                        <h3 class="text-lg font-semibold mb-4 text-gray-700">อาหารขายดี</h3>
-                        <div id="topProducts" class="space-y-2"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Sales History Page (User can see their own sales) -->
-            <div id="salesHistoryPage" class="page hidden">
-                <div class="bg-white rounded-lg p-6 shadow-md">
-                    <h2 class="text-2xl font-bold mb-6 text-gray-800">ประวัติการขาย</h2>
-                    <div class="mb-4">
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                             <div class="bg-green-50 p-4 rounded-lg border border-green-200">
-                                <h3 class="text-sm font-medium text-green-700">ยอดขายวันนี้ (ของฉัน)</h3>
-                                <p class="text-2xl font-bold text-green-600" id="mySalesToday">฿0</p>
+                                <h3 class="text-sm font-medium text-green-700">ยอดขายวันนี้</h3>
+                                <p class="text-2xl font-bold text-green-600" id="reportTodaySales">฿0</p>
                             </div>
                             <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                                <h3 class="text-sm font-medium text-blue-700">จำนวนรายการ (วันนี้)</h3>
-                                <p class="text-2xl font-bold text-blue-600" id="myOrdersToday">0</p>
+                                <h3 class="text-sm font-medium text-blue-700">ยอดขายสัปดาห์นี้</h3>
+                                <p class="text-2xl font-bold text-blue-600" id="reportWeeklySales">฿0</p>
                             </div>
                             <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
-                                <h3 class="text-sm font-medium text-yellow-700">ยอดขายรวม (ของฉัน)</h3>
-                                <p class="text-2xl font-bold text-yellow-600" id="myTotalSales">฿0</p>
+                                <h3 class="text-sm font-medium text-yellow-700">ยอดขายเดือนนี้</h3>
+                                <p class="text-2xl font-bold text-yellow-600" id="reportMonthlySales">฿0</p>
+                            </div>
+                            <div class="bg-purple-50 p-4 rounded-lg border border-purple-200">
+                                <h3 class="text-sm font-medium text-purple-700">จำนวนสมาชิก</h3>
+                                <p class="text-2xl font-bold text-purple-600" id="reportMemberCount">0</p>
                             </div>
                         </div>
                     </div>
-                    <div id="mySalesList" class="space-y-2"></div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-white rounded-lg p-6 shadow-md">
+                            <h3 class="text-lg font-semibold mb-4 text-gray-700">กราฟยอดขาย</h3>
+                            <canvas id="salesChart"></canvas>
+                        </div>
+                        <div class="bg-white rounded-lg p-6 shadow-md">
+                            <h3 class="text-lg font-semibold mb-4 text-gray-700">อาหารขายดี</h3>
+                            <div id="topProducts" class="space-y-2"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sales History Page (User can see their own sales) -->
+                <div id="salesHistoryPage" class="page hidden">
+                    <div class="bg-white rounded-lg p-6 shadow-md">
+                        <h2 class="text-2xl font-bold mb-6 text-gray-800">ประวัติการขาย</h2>
+                        <div class="mb-4">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="bg-green-50 p-4 rounded-lg border border-green-200">
+                                    <h3 class="text-sm font-medium text-green-700">ยอดขายวันนี้ (ของฉัน)</h3>
+                                    <p class="text-2xl font-bold text-green-600" id="mySalesToday">฿0</p>
+                                </div>
+                                <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                                    <h3 class="text-sm font-medium text-blue-700">จำนวนรายการ (วันนี้)</h3>
+                                    <p class="text-2xl font-bold text-blue-600" id="myOrdersToday">0</p>
+                                </div>
+                                <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+                                    <h3 class="text-sm font-medium text-yellow-700">ยอดขายรวม (ของฉัน)</h3>
+                                    <p class="text-2xl font-bold text-yellow-600" id="myTotalSales">฿0</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="mySalesList" class="space-y-2"></div>
+                    </div>
                 </div>
             </div>
         </div>
+        <!-- Sidebar Overlay for Mobile -->
+        <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden md:hidden"></div>
     </div>
 
     <script>
@@ -388,13 +414,6 @@
         // --- GEMINI API SECTION ---
         const GEMINI_API_KEY = ""; // The Canvas environment will handle this.
         
-        /**
-         * Fetches data from a URL with a retry mechanism implementing exponential backoff.
-         * @param {string} url The URL to fetch.
-         * @param {object} options The options for the fetch request.
-         * @param {number} maxRetries The maximum number of retries.
-         * @returns {Promise<any>} A promise that resolves with the JSON response.
-         */
         async function fetchWithRetry(url, options, maxRetries = 3) {
             let attempt = 0;
             while (attempt < maxRetries) {
@@ -410,15 +429,12 @@
                         console.error("Fetch failed after max retries:", error);
                         throw error;
                     }
-                    const delay = Math.pow(2, attempt) * 1000; // Exponential backoff
+                    const delay = Math.pow(2, attempt) * 1000;
                     await new Promise(resolve => setTimeout(resolve, delay));
                 }
             }
         }
 
-        /**
-         * Generates a food description using the Gemini API.
-         */
         async function generateDescription() {
             const productName = document.getElementById('productName').value;
             if (!productName.trim()) {
@@ -472,10 +488,65 @@
         document.addEventListener('DOMContentLoaded', function() {
             loadFromLocalStorage();
             checkLogin();
-            // Add event listener to enable/disable generate button
+            
             document.getElementById('productName').addEventListener('input', (e) => {
                 document.getElementById('generateDescBtn').disabled = !e.target.value.trim();
             });
+
+            // --- Sidebar Toggle Logic ---
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            const mobileHamburgerBtn = document.getElementById('mobileHamburgerBtn');
+            const sidebarOverlay = document.getElementById('sidebarOverlay');
+            const desktopSidebarToggler = document.getElementById('desktopSidebarToggler');
+            const desktopTogglerIcon = document.getElementById('desktopTogglerIcon');
+            
+            const openMobileSidebar = () => {
+                sidebar.classList.remove('-translate-x-full');
+                sidebarOverlay.classList.remove('hidden');
+            };
+
+            const closeMobileSidebar = () => {
+                sidebar.classList.add('-translate-x-full');
+                sidebarOverlay.classList.add('hidden');
+            };
+
+            const toggleDesktopSidebar = () => {
+                const isCollapsed = sidebar.classList.contains('w-20');
+                localStorage.setItem('sidebarState', isCollapsed ? 'expanded' : 'collapsed');
+                applyDesktopSidebarState();
+            };
+
+            const applyDesktopSidebarState = () => {
+                const state = localStorage.getItem('sidebarState');
+                const navTexts = document.querySelectorAll('.nav-text');
+                const navButtons = document.querySelectorAll('#navigation button, #desktopSidebarToggler');
+
+                if (state === 'collapsed') {
+                    sidebar.classList.remove('w-64');
+                    sidebar.classList.add('w-20');
+                    mainContent.classList.remove('md:ml-64');
+                    mainContent.classList.add('md:ml-20');
+                    navTexts.forEach(text => text.classList.add('hidden'));
+                    navButtons.forEach(btn => btn.classList.add('justify-center'));
+                    desktopTogglerIcon.classList.add('rotate-180');
+                } else {
+                    sidebar.classList.remove('w-20');
+                    sidebar.classList.add('w-64');
+                    mainContent.classList.remove('md:ml-20');
+                    mainContent.classList.add('md:ml-64');
+                    navTexts.forEach(text => text.classList.remove('hidden'));
+                    navButtons.forEach(btn => btn.classList.remove('justify-center'));
+                    desktopTogglerIcon.classList.remove('rotate-180');
+                }
+            };
+            
+            mobileHamburgerBtn.addEventListener('click', openMobileSidebar);
+            sidebarOverlay.addEventListener('click', closeMobileSidebar);
+            desktopSidebarToggler.addEventListener('click', toggleDesktopSidebar);
+
+            window.closeMobileSidebar = closeMobileSidebar;
+            window.applyDesktopSidebarState = applyDesktopSidebarState;
         });
 
         // Local Storage functions
@@ -497,7 +568,6 @@
                 members = data.members || [];
                 sales = data.sales || [];
             } else {
-                // Initialize with empty arrays if no data exists
                 products = [];
                 members = [];
                 sales = [];
@@ -506,396 +576,147 @@
 
         // Google Sheets integration functions
         function saveProductsToGoogleSheets() {
-            if (userRole !== 'admin') {
-                showAlert('คุณไม่มีสิทธิ์ในการบันทึกข้อมูล', 'error');
-                return;
-            }
-
-            if (products.length === 0) {
-                showAlert('ไม่มีข้อมูลสินค้าให้บันทึก', 'warning');
-                return;
-            }
-
-            Swal.fire({
-                title: 'กำลังบันทึกข้อมูลสินค้า...',
-                text: 'กรุณารอสักครู่',
-                allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
-            });
-
-            const data = {
-                type: 'products',
-                products: products,
-                timestamp: new Date().toISOString(),
-                savedBy: currentUser
-            };
-
-            // Create JSONP callback
+            if (userRole !== 'admin') { showAlert('คุณไม่มีสิทธิ์ในการบันทึกข้อมูล', 'error'); return; }
+            if (products.length === 0) { showAlert('ไม่มีข้อมูลสินค้าให้บันทึก', 'warning'); return; }
+            Swal.fire({ title: 'กำลังบันทึกข้อมูลสินค้า...', text: 'กรุณารอสักครู่', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
+            const data = { type: 'products', products: products, timestamp: new Date().toISOString(), savedBy: currentUser };
             const callbackName = 'jsonpCallback_' + Date.now();
             window[callbackName] = function(response) {
-                // Clean up
                 document.head.removeChild(script);
                 delete window[callbackName];
-
                 if (response.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'บันทึกสำเร็จ!',
-                        text: `บันทึกข้อมูลสินค้า ${products.length} รายการใน Google Sheets เรียบร้อยแล้ว`,
-                        timer: 3000,
-                        showConfirmButton: false
-                    });
+                    Swal.fire({ icon: 'success', title: 'บันทึกสำเร็จ!', text: `บันทึกข้อมูลสินค้า ${products.length} รายการใน Google Sheets เรียบร้อยแล้ว`, timer: 3000, showConfirmButton: false });
                 } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'เกิดข้อผิดพลาด!',
-                        text: response.error || 'ไม่สามารถบันทึกข้อมูลสินค้าได้'
-                    });
+                    Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด!', text: response.error || 'ไม่สามารถบันทึกข้อมูลสินค้าได้' });
                 }
             };
-
-            // Create script tag for JSONP
             const script = document.createElement('script');
-            const params = new URLSearchParams({
-                action: 'saveProducts',
-                data: JSON.stringify(data),
-                callback: callbackName
-            });
+            const params = new URLSearchParams({ action: 'saveProducts', data: JSON.stringify(data), callback: callbackName });
             script.src = `${GOOGLE_SHEETS_SAVE_URL}?${params.toString()}`;
-            
-            // Handle errors
             script.onerror = function() {
                 document.head.removeChild(script);
                 delete window[callbackName];
-                Swal.fire({
-                    icon: 'error',
-                    title: 'เกิดข้อผิดพลาด!',
-                    text: 'ไม่สามารถเชื่อมต่อกับ Google Sheets ได้'
-                });
+                Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด!', text: 'ไม่สามารถเชื่อมต่อกับ Google Sheets ได้' });
             };
-
             document.head.appendChild(script);
         }
 
         function saveMembersToGoogleSheets() {
-            if (userRole !== 'admin') {
-                showAlert('คุณไม่มีสิทธิ์ในการบันทึกข้อมูล', 'error');
-                return;
-            }
-
-            if (members.length === 0) {
-                showAlert('ไม่มีข้อมูลสมาชิกให้บันทึก', 'warning');
-                return;
-            }
-
-            Swal.fire({
-                title: 'กำลังบันทึกข้อมูลสมาชิก...',
-                text: 'กรุณารอสักครู่',
-                allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
-            });
-
-            const data = {
-                type: 'members',
-                members: members,
-                timestamp: new Date().toISOString(),
-                savedBy: currentUser
-            };
-
-            // Create JSONP callback
+            if (userRole !== 'admin') { showAlert('คุณไม่มีสิทธิ์ในการบันทึกข้อมูล', 'error'); return; }
+            if (members.length === 0) { showAlert('ไม่มีข้อมูลสมาชิกให้บันทึก', 'warning'); return; }
+            Swal.fire({ title: 'กำลังบันทึกข้อมูลสมาชิก...', text: 'กรุณารอสักครู่', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
+            const data = { type: 'members', members: members, timestamp: new Date().toISOString(), savedBy: currentUser };
             const callbackName = 'jsonpCallback_' + Date.now();
             window[callbackName] = function(response) {
-                // Clean up
                 document.head.removeChild(script);
                 delete window[callbackName];
-
                 if (response.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'บันทึกสำเร็จ!',
-                        text: `บันทึกข้อมูลสมาชิก ${members.length} รายการใน Google Sheets เรียบร้อยแล้ว`,
-                        timer: 3000,
-                        showConfirmButton: false
-                    });
+                    Swal.fire({ icon: 'success', title: 'บันทึกสำเร็จ!', text: `บันทึกข้อมูลสมาชิก ${members.length} รายการใน Google Sheets เรียบร้อยแล้ว`, timer: 3000, showConfirmButton: false });
                 } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'เกิดข้อผิดพลาด!',
-                        text: response.error || 'ไม่สามารถบันทึกข้อมูลสมาชิกได้'
-                    });
+                    Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด!', text: response.error || 'ไม่สามารถบันทึกข้อมูลสมาชิกได้' });
                 }
             };
-
-            // Create script tag for JSONP
             const script = document.createElement('script');
-            const params = new URLSearchParams({
-                action: 'saveMembers',
-                data: JSON.stringify(data),
-                callback: callbackName
-            });
+            const params = new URLSearchParams({ action: 'saveMembers', data: JSON.stringify(data), callback: callbackName });
             script.src = `${GOOGLE_SHEETS_SAVE_URL}?${params.toString()}`;
-            
-            // Handle errors
             script.onerror = function() {
                 document.head.removeChild(script);
                 delete window[callbackName];
-                Swal.fire({
-                    icon: 'error',
-                    title: 'เกิดข้อผิดพลาด!',
-                    text: 'ไม่สามารถเชื่อมต่อกับ Google Sheets ได้'
-                });
+                Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด!', text: 'ไม่สามารถเชื่อมต่อกับ Google Sheets ได้' });
             };
-
             document.head.appendChild(script);
         }
 
         function saveSalesReportToGoogleSheets() {
-            if (userRole !== 'admin') {
-                showAlert('คุณไม่มีสิทธิ์ในการบันทึกรายงาน', 'error');
-                return;
-            }
-
-            if (sales.length === 0) {
-                showAlert('ไม่มีข้อมูลยอดขายให้บันทึก', 'warning');
-                return;
-            }
-
-            Swal.fire({
-                title: 'กำลังบันทึกรายงานยอดขาย...',
-                text: 'กรุณารอสักครู่',
-                allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
-            });
-
-            // Prepare sales report data
+            if (userRole !== 'admin') { showAlert('คุณไม่มีสิทธิ์ในการบันทึกรายงาน', 'error'); return; }
+            if (sales.length === 0) { showAlert('ไม่มีข้อมูลยอดขายให้บันทึก', 'warning'); return; }
+            Swal.fire({ title: 'กำลังบันทึกรายงานยอดขาย...', text: 'กรุณารอสักครู่', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
             const today = new Date();
             const todayStr = today.toDateString();
             const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
             const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
-            
             const todaySales = sales.filter(sale => new Date(sale.date).toDateString() === todayStr);
             const weeklySales = sales.filter(sale => new Date(sale.date) >= weekAgo);
             const monthlySales = sales.filter(sale => new Date(sale.date) >= monthAgo);
-            
             const todayTotal = todaySales.reduce((sum, sale) => sum + sale.total, 0);
             const weeklyTotal = weeklySales.reduce((sum, sale) => sum + sale.total, 0);
             const monthlyTotal = monthlySales.reduce((sum, sale) => sum + sale.total, 0);
-
-            // Calculate top products
             const productSales = {};
             sales.forEach(sale => {
-                sale.items.forEach(item => {
-                    if (productSales[item.name]) {
-                        productSales[item.name] += item.quantity;
-                    } else {
-                        productSales[item.name] = item.quantity;
-                    }
-                });
+                sale.items.forEach(item => { productSales[item.name] = (productSales[item.name] || 0) + item.quantity; });
             });
-            
-            const topProducts = Object.entries(productSales)
-                .sort(([,a], [,b]) => b - a)
-                .slice(0, 10)
-                .map(([name, quantity]) => ({ name, quantity }));
-
-            const reportData = {
-                type: 'salesReport',
-                summary: {
-                    todayTotal: todayTotal,
-                    weeklyTotal: weeklyTotal,
-                    monthlyTotal: monthlyTotal,
-                    totalOrders: sales.length,
-                    todayOrders: todaySales.length,
-                    memberCount: members.length
-                },
-                topProducts: topProducts,
-                allSales: sales,
-                timestamp: new Date().toISOString(),
-                generatedBy: currentUser
-            };
-
-            // Create JSONP callback
+            const topProducts = Object.entries(productSales).sort(([,a], [,b]) => b - a).slice(0, 10).map(([name, quantity]) => ({ name, quantity }));
+            const reportData = { type: 'salesReport', summary: { todayTotal, weeklyTotal, monthlyTotal, totalOrders: sales.length, todayOrders: todaySales.length, memberCount: members.length }, topProducts, allSales: sales, timestamp: new Date().toISOString(), generatedBy: currentUser };
             const callbackName = 'jsonpCallback_' + Date.now();
             window[callbackName] = function(response) {
-                // Clean up
                 document.head.removeChild(script);
                 delete window[callbackName];
-
                 if (response.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'บันทึกรายงานสำเร็จ!',
-                        text: `บันทึกรายงานยอดขาย ${sales.length} รายการใน Google Sheets เรียบร้อยแล้ว`,
-                        timer: 3000,
-                        showConfirmButton: false
-                    });
+                    Swal.fire({ icon: 'success', title: 'บันทึกรายงานสำเร็จ!', text: `บันทึกรายงานยอดขาย ${sales.length} รายการใน Google Sheets เรียบร้อยแล้ว`, timer: 3000, showConfirmButton: false });
                 } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'เกิดข้อผิดพลาด!',
-                        text: response.error || 'ไม่สามารถบันทึกรายงานยอดขายได้'
-                    });
+                    Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด!', text: response.error || 'ไม่สามารถบันทึกรายงานยอดขายได้' });
                 }
             };
-
-            // Create script tag for JSONP
             const script = document.createElement('script');
-            const params = new URLSearchParams({
-                action: 'saveSalesReport',
-                data: JSON.stringify(reportData),
-                callback: callbackName
-            });
+            const params = new URLSearchParams({ action: 'saveSalesReport', data: JSON.stringify(reportData), callback: callbackName });
             script.src = `${GOOGLE_SHEETS_SAVE_URL}?${params.toString()}`;
-            
-            // Handle errors
             script.onerror = function() {
                 document.head.removeChild(script);
                 delete window[callbackName];
-                Swal.fire({
-                    icon: 'error',
-                    title: 'เกิดข้อผิดพลาด!',
-                    text: 'ไม่สามารถเชื่อมต่อกับ Google Sheets ได้'
-                });
+                Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด!', text: 'ไม่สามารถเชื่อมต่อกับ Google Sheets ได้' });
             };
-
             document.head.appendChild(script);
         }
 
         function saveToGoogleSheets() {
-            Swal.fire({
-                title: 'กำลังบันทึกข้อมูล...',
-                text: 'กรุณารอสักครู่',
-                allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
-            });
-
-            const data = {
-                products: products,
-                members: members,
-                sales: sales,
-                timestamp: new Date().toISOString(),
-                savedBy: currentUser
-            };
-
-            // Create JSONP callback
+            Swal.fire({ title: 'กำลังบันทึกข้อมูล...', text: 'กรุณารอสักครู่', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
+            const data = { products, members, sales, timestamp: new Date().toISOString(), savedBy: currentUser };
             const callbackName = 'jsonpCallback_' + Date.now();
             window[callbackName] = function(response) {
-                // Clean up
                 document.head.removeChild(script);
                 delete window[callbackName];
-
                 if (response.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'บันทึกสำเร็จ!',
-                        text: 'ข้อมูลถูกบันทึกใน Google Sheets เรียบร้อยแล้ว',
-                        timer: 2000,
-                        showConfirmButton: false
-                    });
+                    Swal.fire({ icon: 'success', title: 'บันทึกสำเร็จ!', text: 'ข้อมูลถูกบันทึกใน Google Sheets เรียบร้อยแล้ว', timer: 2000, showConfirmButton: false });
                 } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'เกิดข้อผิดพลาด!',
-                        text: response.error || 'ไม่สามารถบันทึกข้อมูลได้'
-                    });
+                    Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด!', text: response.error || 'ไม่สามารถบันทึกข้อมูลได้' });
                 }
             };
-
-            // Create script tag for JSONP
             const script = document.createElement('script');
-            const params = new URLSearchParams({
-                action: 'save',
-                data: JSON.stringify(data),
-                callback: callbackName
-            });
+            const params = new URLSearchParams({ action: 'save', data: JSON.stringify(data), callback: callbackName });
             script.src = `${GOOGLE_SHEETS_SAVE_URL}?${params.toString()}`;
-            
-            // Handle errors
             script.onerror = function() {
                 document.head.removeChild(script);
                 delete window[callbackName];
-                Swal.fire({
-                    icon: 'error',
-                    title: 'เกิดข้อผิดพลาด!',
-                    text: 'ไม่สามารถเชื่อมต่อกับ Google Sheets ได้'
-                });
+                Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด!', text: 'ไม่สามารถเชื่อมต่อกับ Google Sheets ได้' });
             };
-
             document.head.appendChild(script);
         }
 
         function loadFromGoogleSheets() {
-            Swal.fire({
-                title: 'กำลังโหลดข้อมูล...',
-                text: 'กรุณารอสักครู่',
-                allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
-            });
-
-            // Create JSONP callback
+            Swal.fire({ title: 'กำลังโหลดข้อมูล...', text: 'กรุณารอสักครู่', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
             const callbackName = 'jsonpCallback_' + Date.now();
             window[callbackName] = function(response) {
-                // Clean up
                 document.head.removeChild(script);
                 delete window[callbackName];
-
                 if (response.success && response.data) {
-                    // Update local data
                     products = response.data.products || [];
                     members = response.data.members || [];
                     sales = response.data.sales || [];
-                    
-                    // Save to local storage
                     saveToLocalStorage();
-                    
-                    // Update UI
                     refreshUI();
-
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'โหลดข้อมูลสำเร็จ!',
-                        text: 'ข้อมูลจาก Google Sheets ถูกโหลดเรียบร้อยแล้ว',
-                        timer: 2000,
-                        showConfirmButton: false
-                    });
+                    Swal.fire({ icon: 'success', title: 'โหลดข้อมูลสำเร็จ!', text: 'ข้อมูลจาก Google Sheets ถูกโหลดเรียบร้อยแล้ว', timer: 2000, showConfirmButton: false });
                 } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'เกิดข้อผิดพลาด!',
-                        text: response.error || 'ไม่สามารถโหลดข้อมูลได้'
-                    });
+                    Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด!', text: response.error || 'ไม่สามารถโหลดข้อมูลได้' });
                 }
             };
-
-            // Create script tag for JSONP
             const script = document.createElement('script');
-            const params = new URLSearchParams({
-                action: 'load',
-                callback: callbackName
-            });
+            const params = new URLSearchParams({ action: 'load', callback: callbackName });
             script.src = `${GOOGLE_SHEETS_LOAD_URL}?${params.toString()}`;
-            
-            // Handle errors
             script.onerror = function() {
                 document.head.removeChild(script);
                 delete window[callbackName];
-                Swal.fire({
-                    icon: 'error',
-                    title: 'เกิดข้อผิดพลาด!',
-                    text: 'ไม่สามารถเชื่อมต่อกับ Google Sheets ได้'
-                });
+                Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด!', text: 'ไม่สามารถเชื่อมต่อกับ Google Sheets ได้' });
             };
-
             document.head.appendChild(script);
         }
 
@@ -912,64 +733,41 @@
         function showMainApp() {
             document.getElementById('loginPage').classList.add('hidden');
             document.getElementById('mainApp').classList.remove('hidden');
-            
             document.getElementById('currentUser').textContent = users[currentUser]?.name || currentUser;
             document.getElementById('currentRole').textContent = userRole === 'admin' ? 'ผู้ดูแลระบบ' : 'พนักงานขาย';
-            
             setupNavigation();
             showPage('home');
             refreshUI();
+            if (window.applyDesktopSidebarState) {
+                window.applyDesktopSidebarState();
+            }
         }
 
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
-            
             if (users[username] && users[username].password === password) {
                 currentUser = username;
                 userRole = users[username].role;
-                
                 showAlert(`ยินดีต้อนรับ ${users[username].name}`, 'success');
-                setTimeout(() => {
-                    showMainApp();
-                }, 1000);
+                setTimeout(() => { showMainApp(); }, 1000);
             } else {
                 showAlert('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง', 'error');
             }
         });
 
         function logout() {
-            Swal.fire({
-                title: 'ออกจากระบบ',
-                text: 'คุณต้องการออกจากระบบหรือไม่?',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'ออกจากระบบ',
-                cancelButtonText: 'ยกเลิก',
-                reverseButtons: true
-            }).then((result) => {
+            Swal.fire({ title: 'ออกจากระบบ', text: 'คุณต้องการออกจากระบบหรือไม่?', icon: 'question', showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#3085d6', confirmButtonText: 'ออกจากระบบ', cancelButtonText: 'ยกเลิก', reverseButtons: true })
+            .then((result) => {
                 if (result.isConfirmed) {
-                    // Clear user data
                     currentUser = null;
                     userRole = null;
                     currentCart = [];
-                    
-                    // Show success message
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'ออกจากระบบสำเร็จ',
-                        text: 'ขอบคุณที่ใช้บริการ',
-                        timer: 1500,
-                        showConfirmButton: false
-                    }).then(() => {
-                        // Reset and show login page
+                    Swal.fire({ icon: 'success', title: 'ออกจากระบบสำเร็จ', text: 'ขอบคุณที่ใช้บริการ', timer: 1500, showConfirmButton: false })
+                    .then(() => {
                         showLoginPage();
                         document.getElementById('loginForm').reset();
-                        
-                        // Clear any displayed data
                         document.getElementById('cart').innerHTML = '';
                         document.getElementById('totalAmount').textContent = '฿0';
                         document.getElementById('paidAmount').value = '';
@@ -983,51 +781,31 @@
         function setupNavigation() {
             const navigation = document.getElementById('navigation');
             navigation.innerHTML = '';
-            
-            const commonPages = [
-                { id: 'home', icon: '🏠', name: 'หน้าแรก' },
-                { id: 'payment', icon: '💸', name: 'ชำระเงิน' }
-            ];
-            
-            const adminPages = [
-                { id: 'addProduct', icon: '🔼', name: 'จัดการสินค้า' },
-                { id: 'addMember', icon: '➕', name: 'จัดการสมาชิก' },
-                { id: 'salesReport', icon: '📊', name: 'รายงานยอดขาย' }
-            ];
-            
-            const userPages = [
-                { id: 'salesHistory', icon: '📋', name: 'ประวัติการขาย' }
-            ];
-            
-            let pages = [...commonPages];
-            
-            if (userRole === 'admin') {
-                pages = [...pages, ...adminPages];
-            } else {
-                pages = [...pages, ...userPages];
-            }
+            const commonPages = [ { id: 'home', icon: '🏠', name: 'หน้าแรก' }, { id: 'payment', icon: '💸', name: 'ชำระเงิน' } ];
+            const adminPages = [ { id: 'addProduct', icon: '🔼', name: 'จัดการสินค้า' }, { id: 'addMember', icon: '➕', name: 'จัดการสมาชิก' }, { id: 'salesReport', icon: '📊', name: 'รายงานยอดขาย' } ];
+            const userPages = [ { id: 'salesHistory', icon: '📋', name: 'ประวัติการขาย' } ];
+            let pages = (userRole === 'admin') ? [...commonPages, ...adminPages] : [...commonPages, ...userPages];
             
             pages.forEach(page => {
                 const button = document.createElement('button');
-                button.onclick = () => showPage(page.id);
-                button.className = 'w-full text-left p-3 rounded-lg hover:bg-orange-600 transition-colors flex items-center space-x-2';
-                button.innerHTML = `<span>${page.icon}</span><span>${page.name}</span>`;
+                button.onclick = () => {
+                    showPage(page.id);
+                    if (window.innerWidth < 768) { // md breakpoint
+                        window.closeMobileSidebar();
+                    }
+                };
+                button.className = 'w-full text-left p-3 rounded-lg hover:bg-orange-600 transition-colors flex items-center';
+                button.innerHTML = `<span>${page.icon}</span><span class="nav-text ml-2">${page.name}</span>`;
                 navigation.appendChild(button);
             });
         }
 
         // Page navigation
         function showPage(pageId) {
-            const pages = document.querySelectorAll('.page');
-            pages.forEach(page => page.classList.add('hidden'));
+            document.querySelectorAll('.page').forEach(page => page.classList.add('hidden'));
             document.getElementById(pageId + 'Page').classList.remove('hidden');
-            
-            if (pageId === 'salesHistory') {
-                updateMySalesHistory();
-            }
-             if (pageId === 'salesReport') {
-                updateSalesReport();
-            }
+            if (pageId === 'salesHistory') updateMySalesHistory();
+            if (pageId === 'salesReport') updateSalesReport();
         }
 
         // Product management
@@ -1060,93 +838,57 @@
             });
             
             document.getElementById('productForm').reset();
-            refreshUI();
+            refreshUI(); // <-- บรรทัดนี้คือส่วนสำคัญที่เพิ่มเข้ามาเพื่อให้หน้าจออัปเดตครับ
         });
 
         function displayProducts() {
             const productList = document.getElementById('productList');
             productList.innerHTML = '';
-            
             products.forEach((product, index) => {
                 const div = document.createElement('div');
-                div.className = 'p-3 bg-gray-50 rounded border flex justify-between items-center';
+                div.className = 'p-3 bg-gray-50 rounded border flex flex-col sm:flex-row justify-between sm:items-center space-y-2 sm:space-y-0';
                 div.innerHTML = `
-                    <div>
+                    <div class="w-full sm:w-auto text-left">
                         <h4 class="font-medium">${product.name}</h4>
-                        <p class="text-sm text-gray-600">${product.description}</p>
+                        <p class="text-sm text-gray-600">${product.description || ''}</p>
                         <p class="text-sm">ราคา: ฿${product.price} | คงเหลือ: ${product.stock}</p>
                     </div>
-                    <div class="flex space-x-2">
+                    <div class="flex space-x-2 flex-shrink-0">
                         ${userRole === 'admin' ? `
-                            <button onclick="editProduct(${index})" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm">
-                                แก้ไข
-                            </button>
-                            <button onclick="deleteProduct(${index})" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm">
-                                ลบ
-                            </button>
+                            <button onclick="editProduct(${index})" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm">แก้ไข</button>
+                            <button onclick="deleteProduct(${index})" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm">ลบ</button>
                         ` : ''}
-                    </div>
-                `;
+                    </div>`;
                 productList.appendChild(div);
             });
         }
         
         function editProduct(index) {
-            if (userRole !== 'admin') {
-                showAlert('คุณไม่มีสิทธิ์ในการแก้ไขสินค้า', 'error');
-                return;
-            }
+            if (userRole !== 'admin') { showAlert('คุณไม่มีสิทธิ์ในการแก้ไขสินค้า', 'error'); return; }
             const product = products[index];
-
             Swal.fire({
                 title: 'แก้ไขสินค้า',
                 html: `
                     <div class="space-y-4 text-left">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">ชื่อสินค้า</label>
-                            <input id="swal-productName" class="swal2-input w-full" value="${product.name}">
+                        <div><label class="block text-sm font-medium text-gray-700 mb-1">ชื่อสินค้า</label><input id="swal-productName" class="swal2-input w-full" value="${product.name}"></div>
+                        <div><label class="block text-sm font-medium text-gray-700 mb-1">คำอธิบาย</label><textarea id="swal-productDescription" class="swal2-textarea w-full">${product.description || ''}</textarea></div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div><label class="block text-sm font-medium text-gray-700 mb-1">ราคา</label><input id="swal-productPrice" type="number" class="swal2-input w-full" value="${product.price}"></div>
+                            <div><label class="block text-sm font-medium text-gray-700 mb-1">คงเหลือ</label><input id="swal-productStock" type="number" class="swal2-input w-full" value="${product.stock}"></div>
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">คำอธิบาย</label>
-                            <textarea id="swal-productDescription" class="swal2-textarea w-full">${product.description}</textarea>
-                        </div>
-                         <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">ราคา</label>
-                                <input id="swal-productPrice" type="number" class="swal2-input w-full" value="${product.price}">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">คงเหลือ</label>
-                                <input id="swal-productStock" type="number" class="swal2-input w-full" value="${product.stock}">
-                            </div>
-                        </div>
-                    </div>
-                `,
-                focusConfirm: false,
-                showCancelButton: true,
-                confirmButtonText: 'บันทึก',
-                cancelButtonText: 'ยกเลิก',
+                    </div>`,
+                focusConfirm: false, showCancelButton: true, confirmButtonText: 'บันทึก', cancelButtonText: 'ยกเลิก',
                 preConfirm: () => {
                     const name = document.getElementById('swal-productName').value;
                     const description = document.getElementById('swal-productDescription').value;
                     const price = parseFloat(document.getElementById('swal-productPrice').value);
                     const stock = parseInt(document.getElementById('swal-productStock').value);
-
-                    if (!name || isNaN(price) || isNaN(stock)) {
-                        Swal.showValidationMessage(`กรุณากรอกข้อมูลให้ครบถ้วนและถูกต้อง`);
-                        return false;
-                    }
+                    if (!name || isNaN(price) || isNaN(stock)) { Swal.showValidationMessage(`กรุณากรอกข้อมูลให้ครบถ้วนและถูกต้อง`); return false; }
                     return { name, description, price, stock };
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    products[index] = {
-                        ...products[index],
-                        name: result.value.name,
-                        description: result.value.description,
-                        price: result.value.price,
-                        stock: result.value.stock
-                    };
+                    products[index] = { ...products[index], name: result.value.name, description: result.value.description, price: result.value.price, stock: result.value.stock };
                     saveToLocalStorage();
                     refreshUI();
                     Swal.fire('บันทึกแล้ว!', 'ข้อมูลสินค้าถูกอัปเดตแล้ว', 'success');
@@ -1154,35 +896,14 @@
             });
         }
 
-
         function deleteProduct(index) {
-            if (userRole !== 'admin') {
-                showAlert('คุณไม่มีสิทธิ์ในการลบสินค้า', 'error');
-                return;
-            }
-            
-            Swal.fire({
-                title: 'ยืนยันการลบ',
-                text: 'คุณต้องการลบสินค้านี้หรือไม่?',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'ลบ',
-                cancelButtonText: 'ยกเลิก'
-            }).then((result) => {
+            if (userRole !== 'admin') { showAlert('คุณไม่มีสิทธิ์ในการลบสินค้า', 'error'); return; }
+            Swal.fire({ title: 'ยืนยันการลบ', text: 'คุณต้องการลบสินค้านี้หรือไม่?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#3085d6', confirmButtonText: 'ลบ', cancelButtonText: 'ยกเลิก'})
+            .then((result) => {
                 if (result.isConfirmed) {
                     products.splice(index, 1);
                     saveToLocalStorage();
-                    
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'ลบสำเร็จ!',
-                        text: 'สินค้าถูกลบเรียบร้อยแล้ว',
-                        timer: 1500,
-                        showConfirmButton: false
-                    });
-                    
+                    Swal.fire({ icon: 'success', title: 'ลบสำเร็จ!', text: 'สินค้าถูกลบเรียบร้อยแล้ว', timer: 1500, showConfirmButton: false });
                     refreshUI();
                 }
             });
@@ -1191,32 +912,11 @@
         // Member management
         document.getElementById('memberForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            
-            if (userRole !== 'admin') {
-                showAlert('คุณไม่มีสิทธิ์ในการเพิ่มสมาชิก', 'error');
-                return;
-            }
-            
-            const member = {
-                employeeId: document.getElementById('employeeId').value,
-                firstName: document.getElementById('firstName').value,
-                lastName: document.getElementById('lastName').value,
-                department: document.getElementById('department').value,
-                createdAt: new Date().toISOString(),
-                createdBy: currentUser
-            };
-            
+            if (userRole !== 'admin') { showAlert('คุณไม่มีสิทธิ์ในการเพิ่มสมาชิก', 'error'); return; }
+            const member = { employeeId: document.getElementById('employeeId').value, firstName: document.getElementById('firstName').value, lastName: document.getElementById('lastName').value, department: document.getElementById('department').value, createdAt: new Date().toISOString(), createdBy: currentUser };
             members.push(member);
             saveToLocalStorage();
-            
-            Swal.fire({
-                icon: 'success',
-                title: 'เพิ่มสมาชิกสำเร็จ!',
-                text: 'สมาชิกถูกเพิ่มเรียบร้อยแล้ว',
-                timer: 1500,
-                showConfirmButton: false
-            });
-            
+            Swal.fire({ icon: 'success', title: 'เพิ่มสมาชิกสำเร็จ!', text: 'สมาชิกถูกเพิ่มเรียบร้อยแล้ว', timer: 1500, showConfirmButton: false });
             document.getElementById('memberForm').reset();
             refreshUI();
         });
@@ -1224,86 +924,50 @@
         function displayMembers() {
             const memberList = document.getElementById('memberList');
             memberList.innerHTML = '';
-            
             members.forEach((member, index) => {
                 const div = document.createElement('div');
-                div.className = 'p-3 bg-gray-50 rounded border flex justify-between items-center';
+                div.className = 'p-3 bg-gray-50 rounded border flex flex-col sm:flex-row justify-between sm:items-center space-y-2 sm:space-y-0';
                 div.innerHTML = `
-                    <div>
+                    <div class="w-full sm:w-auto text-left">
                         <h4 class="font-medium">${member.firstName} ${member.lastName}</h4>
                         <p class="text-sm text-gray-600">รหัส: ${member.employeeId} | แผนก: ${member.department}</p>
                     </div>
-                    <div class="flex space-x-2">
+                    <div class="flex space-x-2 flex-shrink-0">
                         ${userRole === 'admin' ? `
-                            <button onclick="editMember(${index})" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm">
-                                แก้ไข
-                            </button>
-                            <button onclick="deleteMember(${index})" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm">
-                                ลบ
-                            </button>
+                            <button onclick="editMember(${index})" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm">แก้ไข</button>
+                            <button onclick="deleteMember(${index})" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm">ลบ</button>
                         ` : ''}
-                    </div>
-                `;
+                    </div>`;
                 memberList.appendChild(div);
             });
         }
         
         function editMember(index) {
-             if (userRole !== 'admin') {
-                showAlert('คุณไม่มีสิทธิ์ในการแก้ไขสมาชิก', 'error');
-                return;
-            }
+             if (userRole !== 'admin') { showAlert('คุณไม่มีสิทธิ์ในการแก้ไขสมาชิก', 'error'); return; }
             const member = members[index];
-
             Swal.fire({
                 title: 'แก้ไขข้อมูลสมาชิก',
                 html: `
                     <div class="space-y-4 text-left">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">รหัสพนักงาน</label>
-                            <input id="swal-employeeId" class="swal2-input w-full" value="${member.employeeId}">
-                        </div>
+                        <div><label class="block text-sm font-medium text-gray-700 mb-1">รหัสพนักงาน</label><input id="swal-employeeId" class="swal2-input w-full" value="${member.employeeId}"></div>
                         <div class="grid grid-cols-2 gap-4">
-                           <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">ชื่อ</label>
-                                <input id="swal-firstName" class="swal2-input w-full" value="${member.firstName}">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">นามสกุล</label>
-                                <input id="swal-lastName" class="swal2-input w-full" value="${member.lastName}">
-                            </div>
+                           <div><label class="block text-sm font-medium text-gray-700 mb-1">ชื่อ</label><input id="swal-firstName" class="swal2-input w-full" value="${member.firstName}"></div>
+                           <div><label class="block text-sm font-medium text-gray-700 mb-1">นามสกุล</label><input id="swal-lastName" class="swal2-input w-full" value="${member.lastName}"></div>
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">แผนก</label>
-                            <input id="swal-department" class="swal2-input w-full" value="${member.department}">
-                        </div>
-                    </div>
-                `,
-                focusConfirm: false,
-                showCancelButton: true,
-                confirmButtonText: 'บันทึก',
-                cancelButtonText: 'ยกเลิก',
+                        <div><label class="block text-sm font-medium text-gray-700 mb-1">แผนก</label><input id="swal-department" class="swal2-input w-full" value="${member.department}"></div>
+                    </div>`,
+                focusConfirm: false, showCancelButton: true, confirmButtonText: 'บันทึก', cancelButtonText: 'ยกเลิก',
                 preConfirm: () => {
                     const employeeId = document.getElementById('swal-employeeId').value;
                     const firstName = document.getElementById('swal-firstName').value;
                     const lastName = document.getElementById('swal-lastName').value;
                     const department = document.getElementById('swal-department').value;
-
-                    if (!employeeId || !firstName || !lastName || !department) {
-                        Swal.showValidationMessage(`กรุณากรอกข้อมูลให้ครบถ้วน`);
-                        return false;
-                    }
+                    if (!employeeId || !firstName || !lastName || !department) { Swal.showValidationMessage(`กรุณากรอกข้อมูลให้ครบถ้วน`); return false; }
                     return { employeeId, firstName, lastName, department };
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
-                     members[index] = {
-                        ...members[index],
-                        employeeId: result.value.employeeId,
-                        firstName: result.value.firstName,
-                        lastName: result.value.lastName,
-                        department: result.value.department
-                    };
+                     members[index] = { ...members[index], employeeId: result.value.employeeId, firstName: result.value.firstName, lastName: result.value.lastName, department: result.value.department };
                     saveToLocalStorage();
                     refreshUI();
                     Swal.fire('บันทึกแล้ว!', 'ข้อมูลสมาชิกถูกอัปเดตแล้ว', 'success');
@@ -1311,35 +975,14 @@
             });
         }
 
-
         function deleteMember(index) {
-            if (userRole !== 'admin') {
-                showAlert('คุณไม่มีสิทธิ์ในการลบสมาชิก', 'error');
-                return;
-            }
-            
-            Swal.fire({
-                title: 'ยืนยันการลบ',
-                text: 'คุณต้องการลบสมาชิกนี้หรือไม่?',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'ลบ',
-                cancelButtonText: 'ยกเลิก'
-            }).then((result) => {
+            if (userRole !== 'admin') { showAlert('คุณไม่มีสิทธิ์ในการลบสมาชิก', 'error'); return; }
+            Swal.fire({ title: 'ยืนยันการลบ', text: 'คุณต้องการลบสมาชิกนี้หรือไม่?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#3085d6', confirmButtonText: 'ลบ', cancelButtonText: 'ยกเลิก' })
+            .then((result) => {
                 if (result.isConfirmed) {
                     members.splice(index, 1);
                     saveToLocalStorage();
-                    
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'ลบสำเร็จ!',
-                        text: 'สมาชิกถูกลบเรียบร้อยแล้ว',
-                        timer: 1500,
-                        showConfirmButton: false
-                    });
-                    
+                    Swal.fire({ icon: 'success', title: 'ลบสำเร็จ!', text: 'สมาชิกถูกลบเรียบร้อยแล้ว', timer: 1500, showConfirmButton: false });
                     refreshUI();
                 }
             });
@@ -1349,7 +992,6 @@
         function loadProductOptions() {
             const select = document.getElementById('productSelect');
             select.innerHTML = '<option value="">เลือกอาหาร</option>';
-            
             products.forEach((product, index) => {
                 if (product.stock > 0) {
                     const option = document.createElement('option');
@@ -1363,7 +1005,6 @@
         function loadMemberOptions() {
             const select = document.getElementById('memberSelect');
             select.innerHTML = '<option value="">เลือกสมาชิก</option>';
-            
             members.forEach((member, index) => {
                 const option = document.createElement('option');
                 option.value = index;
@@ -1375,30 +1016,12 @@
         function addToCart() {
             const productIndex = parseInt(document.getElementById('productSelect').value);
             const quantity = parseInt(document.getElementById('quantity').value);
-            
-            if (isNaN(productIndex) || !quantity) {
-                showAlert('กรุณาเลือกสินค้าและจำนวน', 'warning');
-                return;
-            }
-            
+            if (isNaN(productIndex) || !quantity) { showAlert('กรุณาเลือกสินค้าและจำนวน', 'warning'); return; }
             const product = products[productIndex];
-            if (product.stock < quantity) {
-                showAlert(`มีสินค้าเหลือเพียง ${product.stock} ชิ้น`, 'error');
-                return;
-            }
-            
+            if (product.stock < quantity) { showAlert(`มีสินค้าเหลือเพียง ${product.stock} ชิ้น`, 'error'); return; }
             const existingItem = currentCart.find(item => item.productIndex === productIndex);
-            if (existingItem) {
-                existingItem.quantity += quantity;
-            } else {
-                currentCart.push({
-                    productIndex: productIndex,
-                    name: product.name,
-                    price: product.price,
-                    quantity: quantity
-                });
-            }
-            
+            if (existingItem) { existingItem.quantity += quantity; } 
+            else { currentCart.push({ productIndex: productIndex, name: product.name, price: product.price, quantity: quantity }); }
             displayCart();
             document.getElementById('quantity').value = 1;
         }
@@ -1407,11 +1030,9 @@
             const cart = document.getElementById('cart');
             cart.innerHTML = '';
             let total = 0;
-            
             currentCart.forEach((item, index) => {
                 const itemTotal = item.price * item.quantity;
                 total += itemTotal;
-                
                 const div = document.createElement('div');
                 div.className = 'p-3 bg-gray-50 rounded border flex justify-between items-center';
                 div.innerHTML = `
@@ -1419,13 +1040,9 @@
                         <h4 class="font-medium">${item.name}</h4>
                         <p class="text-sm text-gray-600">฿${item.price} x ${item.quantity} = ฿${itemTotal}</p>
                     </div>
-                    <button onclick="removeFromCart(${index})" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm">
-                        ลบ
-                    </button>
-                `;
+                    <button onclick="removeFromCart(${index})" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm flex-shrink-0">ลบ</button>`;
                 cart.appendChild(div);
             });
-            
             document.getElementById('totalAmount').textContent = `฿${total}`;
             calculateChange();
         }
@@ -1439,69 +1056,31 @@
             const total = currentCart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
             const paid = parseFloat(document.getElementById('paidAmount').value) || 0;
             const change = paid - total;
-            
             document.getElementById('changeAmount').value = change >= 0 ? `฿${change}` : 'ไม่เพียงพอ';
         }
 
         function confirmPayment() {
-            if (currentCart.length === 0) {
-                showAlert('ไม่มีสินค้าในตะกร้า', 'warning');
-                return;
-            }
-            
+            if (currentCart.length === 0) { showAlert('ไม่มีสินค้าในตะกร้า', 'warning'); return; }
             const total = currentCart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
             const paid = parseFloat(document.getElementById('paidAmount').value) || 0;
-            
-            if (paid < total) {
-                showAlert('จำนวนเงินไม่เพียงพอ', 'error');
-                return;
-            }
-            
+            if (paid < total) { showAlert('จำนวนเงินไม่เพียงพอ', 'error'); return; }
             const memberIndex = document.getElementById('memberSelect').value;
             const member = memberIndex !== '' ? members[parseInt(memberIndex)] : null;
             const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
-            
-            const sale = {
-                memberId: memberIndex,
-                memberName: member ? `${member.firstName} ${member.lastName}` : 'ลูกค้าทั่วไป',
-                items: [...currentCart],
-                total: total,
-                paid: paid,
-                change: paid - total,
-                paymentMethod: paymentMethod,
-                date: new Date().toISOString(),
-                soldBy: currentUser
-            };
-            
-            // Update product stock
-            sale.items.forEach(item => {
-                products[item.productIndex].stock -= item.quantity;
-            });
-            
-            // Add sale record
+            const sale = { memberId: memberIndex, memberName: member ? `${member.firstName} ${member.lastName}` : 'ลูกค้าทั่วไป', items: [...currentCart], total: total, paid: paid, change: paid - total, paymentMethod: paymentMethod, date: new Date().toISOString(), soldBy: currentUser };
+            sale.items.forEach(item => { products[item.productIndex].stock -= item.quantity; });
             sales.push(sale);
             saveToLocalStorage();
-            
-            Swal.fire({
-                icon: 'success',
-                title: 'ชำระเงินสำเร็จ!',
-                text: `เงินทอน: ฿${paid - total}`,
-                timer: 2000,
-                showConfirmButton: false
-            });
-            
-            // Reset form
+            Swal.fire({ icon: 'success', title: 'ชำระเงินสำเร็จ!', text: `เงินทอน: ฿${paid - total}`, timer: 2000, showConfirmButton: false });
             currentCart = [];
             displayCart();
             document.getElementById('memberSelect').value = '';
             document.getElementById('productSelect').value = '';
             document.getElementById('paidAmount').value = '';
             document.getElementById('changeAmount').value = '';
-            
             refreshUI();
         }
 
-        // --- NEW --- Central function to refresh all UI components
         function refreshUI() {
             displayProducts();
             displayMembers();
@@ -1512,193 +1091,108 @@
             updateMySalesHistory();
         }
 
-        // Dashboard updates
         function updateDashboard() {
             const today = new Date().toDateString();
             const todaySales = sales.filter(sale => new Date(sale.date).toDateString() === today);
             const todayTotal = todaySales.reduce((sum, sale) => sum + sale.total, 0);
-            
             document.getElementById('todaySales').textContent = `฿${todayTotal}`;
             document.getElementById('memberCount').textContent = members.length;
             document.getElementById('productCount').textContent = products.length;
         }
 
-        // Sales report (Admin only)
         function updateSalesReport() {
             if (userRole !== 'admin') return;
-            
             const today = new Date();
             const todayStr = today.toDateString();
             const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
             const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
-            
             const todaySales = sales.filter(sale => new Date(sale.date).toDateString() === todayStr);
             const weeklySales = sales.filter(sale => new Date(sale.date) >= weekAgo);
             const monthlySales = sales.filter(sale => new Date(sale.date) >= monthAgo);
-            
             const todayTotal = todaySales.reduce((sum, sale) => sum + sale.total, 0);
             const weeklyTotal = weeklySales.reduce((sum, sale) => sum + sale.total, 0);
             const monthlyTotal = monthlySales.reduce((sum, sale) => sum + sale.total, 0);
-            
             document.getElementById('reportTodaySales').textContent = `฿${todayTotal}`;
             document.getElementById('reportWeeklySales').textContent = `฿${weeklyTotal}`;
             document.getElementById('reportMonthlySales').textContent = `฿${monthlyTotal}`;
             document.getElementById('reportMemberCount').textContent = members.length;
-            
             updateSalesChart();
             updateTopProducts();
         }
 
         function updateSalesChart() {
             if (userRole !== 'admin') return;
-            
             const ctx = document.getElementById('salesChart').getContext('2d');
-            
-            if (salesChartInstance) {
-                salesChartInstance.destroy();
-            }
-
-            // Get last 7 days data
+            if (salesChartInstance) { salesChartInstance.destroy(); }
             const last7Days = [];
             const salesData = [];
-            
             for (let i = 6; i >= 0; i--) {
                 const date = new Date();
                 date.setDate(date.getDate() - i);
-                const dateStr = date.toDateString();
-                
                 last7Days.push(date.toLocaleDateString('th-TH', { weekday: 'short' }));
-                
-                const daySales = sales.filter(sale => new Date(sale.date).toDateString() === dateStr);
-                const dayTotal = daySales.reduce((sum, sale) => sum + sale.total, 0);
-                salesData.push(dayTotal);
+                const daySales = sales.filter(sale => new Date(sale.date).toDateString() === date.toDateString());
+                salesData.push(daySales.reduce((sum, sale) => sum + sale.total, 0));
             }
-            
-            salesChartInstance = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: last7Days,
-                    datasets: [{
-                        label: 'ยอดขาย (บาท)',
-                        data: salesData,
-                        backgroundColor: 'rgba(251, 146, 60, 0.8)',
-                        borderColor: 'rgba(251, 146, 60, 1)',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
-                }
-            });
+            salesChartInstance = new Chart(ctx, { type: 'bar', data: { labels: last7Days, datasets: [{ label: 'ยอดขาย (บาท)', data: salesData, backgroundColor: 'rgba(251, 146, 60, 0.8)', borderColor: 'rgba(251, 146, 60, 1)', borderWidth: 1 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } } });
         }
 
         function updateTopProducts() {
             if (userRole !== 'admin') return;
-            
             const productSales = {};
-            
-            sales.forEach(sale => {
-                sale.items.forEach(item => {
-                    if (productSales[item.name]) {
-                        productSales[item.name] += item.quantity;
-                    } else {
-                        productSales[item.name] = item.quantity;
-                    }
-                });
-            });
-            
-            const sortedProducts = Object.entries(productSales)
-                .sort(([,a], [,b]) => b - a)
-                .slice(0, 5);
-            
+            sales.forEach(sale => { sale.items.forEach(item => { productSales[item.name] = (productSales[item.name] || 0) + item.quantity; }); });
+            const sortedProducts = Object.entries(productSales).sort(([,a], [,b]) => b - a).slice(0, 5);
             const topProducts = document.getElementById('topProducts');
             topProducts.innerHTML = '';
-            
             sortedProducts.forEach(([name, quantity], index) => {
                 const div = document.createElement('div');
                 div.className = 'p-3 bg-gray-50 rounded border flex justify-between items-center';
                 div.innerHTML = `
                     <div class="flex items-center space-x-3">
-                        <span class="bg-orange-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">
-                            ${index + 1}
-                        </span>
+                        <span class="bg-orange-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">${index + 1}</span>
                         <span class="font-medium">${name}</span>
                     </div>
-                    <span class="text-gray-600">${quantity} ชิ้น</span>
-                `;
+                    <span class="text-gray-600">${quantity} ชิ้น</span>`;
                 topProducts.appendChild(div);
             });
         }
 
-        // My sales history (User can see their own sales)
         function updateMySalesHistory() {
             if (userRole === 'admin') return;
-            
             const mySales = sales.filter(sale => sale.soldBy === currentUser);
             const today = new Date().toDateString();
             const todayMySales = mySales.filter(sale => new Date(sale.date).toDateString() === today);
-            
             const todayTotal = todayMySales.reduce((sum, sale) => sum + sale.total, 0);
             const totalSales = mySales.reduce((sum, sale) => sum + sale.total, 0);
-            
             document.getElementById('mySalesToday').textContent = `฿${todayTotal}`;
             document.getElementById('myOrdersToday').textContent = todayMySales.length;
             document.getElementById('myTotalSales').textContent = `฿${totalSales}`;
-            
             const mySalesList = document.getElementById('mySalesList');
             mySalesList.innerHTML = '';
-            
-            const recentSales = mySales.slice(-10).reverse();
-            
+            const recentSales = mySales.slice(-20).reverse();
             recentSales.forEach(sale => {
                 const div = document.createElement('div');
                 div.className = 'p-4 bg-gray-50 rounded border';
-                
                 const saleDate = new Date(sale.date);
                 const itemsList = sale.items.map(item => `${item.name} x${item.quantity}`).join(', ');
-                
                 div.innerHTML = `
-                    <div class="flex justify-between items-start mb-2">
+                    <div class="flex flex-col sm:flex-row justify-between sm:items-start space-y-2 sm:space-y-0">
                         <div>
                             <h4 class="font-medium">ลูกค้า: ${sale.memberName}</h4>
                             <p class="text-sm text-gray-600">${itemsList}</p>
                         </div>
-                        <div class="text-right">
+                        <div class="text-left sm:text-right flex-shrink-0">
                             <p class="font-bold text-green-600">฿${sale.total}</p>
                             <p class="text-xs text-gray-500">${saleDate.toLocaleString('th-TH')}</p>
                         </div>
-                    </div>
-                `;
+                    </div>`;
                 mySalesList.appendChild(div);
             });
-            
-            if (recentSales.length === 0) {
-                mySalesList.innerHTML = '<p class="text-gray-500 text-center py-4">ยังไม่มีประวัติการขาย</p>';
-            }
+            if (recentSales.length === 0) { mySalesList.innerHTML = '<p class="text-gray-500 text-center py-4">ยังไม่มีประวัติการขาย</p>'; }
         }
 
-        // Utility functions
         function showAlert(message, type = 'info') {
-            const iconMap = {
-                'success': 'success',
-                'error': 'error',
-                'warning': 'warning',
-                'info': 'info'
-            };
-            
-            Swal.fire({
-                icon: iconMap[type] || 'info',
-                title: message,
-                timer: 2000,
-                showConfirmButton: false,
-                toast: true,
-                position: 'top-end'
-            });
+            const iconMap = { 'success': 'success', 'error': 'error', 'warning': 'warning', 'info': 'info' };
+            Swal.fire({ icon: iconMap[type] || 'info', title: message, timer: 2000, showConfirmButton: false, toast: true, position: 'top-end' });
         }
 
     </script>
