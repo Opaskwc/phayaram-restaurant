@@ -130,7 +130,7 @@
                         <h3 class="text-lg font-semibold mb-4 text-gray-700">ข่าวประกาศ</h3>
                         <div class="space-y-2">
                             <div class="p-3 bg-orange-50 rounded border-l-4 border-orange-400">
-                                <p class="text-sm">🎉 เมนูใหม่! ข้าวผัดพะเยาราม พิเศษ 20 บาท</p>
+                                <p class="text-sm">🎉 เมนูใหม่! ข้าวผัดพะเยาราม พิเศษ 45 บาท</p>
                             </div>
                             <div class="p-3 bg-blue-50 rounded border-l-4 border-blue-400">
                                 <p class="text-sm">📢 โปรโมชั่นสมาชิก ลด 10% ทุกเมนู</p>
@@ -328,7 +328,9 @@
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <div class="bg-white rounded-lg p-6 shadow-md">
                             <h3 class="text-lg font-semibold mb-4 text-gray-700">กราฟยอดขาย</h3>
-                            <canvas id="salesChart"></canvas>
+                            <div class="relative h-80">
+                                <canvas id="salesChart"></canvas>
+                            </div>
                         </div>
                         <div class="bg-white rounded-lg p-6 shadow-md">
                             <h3 class="text-lg font-semibold mb-4 text-gray-700">อาหารขายดี</h3>
@@ -829,10 +831,51 @@
         function updateSalesChart() {
             if (userRole !== 'admin') return;
             const ctx = document.getElementById('salesChart').getContext('2d');
-            if (salesChartInstance) salesChartInstance.destroy();
-            const labels = Array.from({length: 7}, (_, i) => { const d = new Date(); d.setDate(d.getDate() - i); return d.toLocaleDateString('th-TH', { weekday: 'short' }); }).reverse();
-            const data = Array.from({length: 7}, (_, i) => { const d = new Date(); d.setDate(d.getDate() - i); const dStr = d.toDateString(); return sales.filter(s => new Date(s.date).toDateString() === dStr).reduce((sum, s) => sum + s.total, 0); }).reverse();
-            salesChartInstance = new Chart(ctx, { type: 'bar', data: { labels, datasets: [{ label: 'ยอดขาย (บาท)', data, backgroundColor: 'rgba(251, 146, 60, 0.8)' }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } } });
+            if (salesChartInstance) {
+                salesChartInstance.destroy();
+            }
+
+            const labels = Array.from({length: 7}, (_, i) => {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                return d.toLocaleDateString('th-TH', { weekday: 'short' });
+            }).reverse();
+
+            const data = Array.from({length: 7}, (_, i) => {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+
+                const dayTotal = sales.filter(s => {
+                    if (!s.date) return false;
+                    const saleDate = new Date(s.date);
+                    return saleDate.getFullYear() === d.getFullYear() &&
+                           saleDate.getMonth() === d.getMonth() &&
+                           saleDate.getDate() === d.getDate();
+                }).reduce((sum, s) => sum + s.total, 0);
+
+                return dayTotal;
+            }).reverse();
+
+            salesChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'ยอดขาย (บาท)',
+                        data: data,
+                        backgroundColor: 'rgba(251, 146, 60, 0.8)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
         }
 
         function updateTopProducts() {
@@ -876,5 +919,7 @@
     </script>
 </body>
 </html>
+
+
 
 
