@@ -188,57 +188,46 @@
 
                 <!-- Payment Page -->
                 <div id="paymentPage" class="page hidden">
-                    <div class="bg-white rounded-lg p-6 shadow-md">
-                        <h2 class="text-2xl font-bold mb-6 text-gray-800">ชำระเงิน</h2>
-                        <form id="paymentForm" class="space-y-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">เลือกสมาชิก</label>
-                                <select id="memberSelect" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500">
-                                    <option value="">เลือกสมาชิก</option>
-                                </select>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Product Grid -->
+                        <div class="bg-white rounded-lg p-6 shadow-md">
+                            <h2 class="text-2xl font-bold mb-4 text-gray-800">รายการสินค้า</h2>
+                            <input type="text" id="productSearch" placeholder="ค้นหาสินค้า..." class="w-full p-3 mb-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500">
+                            <div id="productGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-4 max-h-[60vh] overflow-y-auto">
+                                <!-- Product cards will be inserted here -->
                             </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">เลือกรายการอาหาร</label>
-                                <select id="productSelect" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500">
-                                    <option value="">เลือกอาหาร</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">จำนวน</label>
-                                <input type="number" id="quantity" value="1" min="1" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500">
-                            </div>
-                            <button type="button" onclick="addToCart()" class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg transition-colors">
-                                เพิ่มลงตะกร้า
-                            </button>
-                        </form>
+                        </div>
 
-                        <div class="mt-6">
-                            <h3 class="text-lg font-semibold mb-4 text-gray-700">ตะกร้าสินค้า</h3>
-                            <div id="cart" class="space-y-2 mb-4"></div>
+                        <!-- Cart & Payment -->
+                        <div class="bg-white rounded-lg p-6 shadow-md">
+                             <h2 class="text-2xl font-bold mb-4 text-gray-800">ตะกร้า & ชำระเงิน</h2>
+                             <div id="memberSelectContainer">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">เลือกสมาชิก</label>
+                                <select id="memberSelect" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 mb-4">
+                                    <option value="">(ลูกค้าทั่วไป)</option>
+                                </select>
+                            </div>
+                            
+                            <div id="cart" class="space-y-2 mb-4 max-h-40 overflow-y-auto"></div>
+                            
                             <div class="border-t pt-4">
                                 <div class="flex justify-between items-center mb-4">
                                     <span class="text-lg font-semibold">ยอดรวม:</span>
                                     <span class="text-xl font-bold text-green-600" id="totalAmount">฿0</span>
                                 </div>
-                                
                                 <div class="mb-4">
                                     <label class="block text-sm font-medium text-gray-700 mb-2">วิธีการชำระเงิน</label>
                                     <div class="flex items-center space-x-4">
                                         <div class="flex items-center">
                                             <input id="paymentCash" name="paymentMethod" type="radio" value="เงินสด" class="focus:ring-orange-500 h-4 w-4 text-orange-600 border-gray-300" checked>
-                                            <label for="paymentCash" class="ml-2 block text-sm text-gray-900">
-                                                เงินสด
-                                            </label>
+                                            <label for="paymentCash" class="ml-2 block text-sm text-gray-900">เงินสด</label>
                                         </div>
                                         <div class="flex items-center">
                                             <input id="paymentTransfer" name="paymentMethod" type="radio" value="โอน" class="focus:ring-orange-500 h-4 w-4 text-orange-600 border-gray-300">
-                                            <label for="paymentTransfer" class="ml-2 block text-sm text-gray-900">
-                                                โอน
-                                            </label>
+                                            <label for="paymentTransfer" class="ml-2 block text-sm text-gray-900">โอน</label>
                                         </div>
                                     </div>
                                 </div>
-
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">จำนวนเงินที่จ่าย</label>
@@ -441,8 +430,18 @@
             document.querySelectorAll('input[name="paymentMethod"]').forEach(radio => {
                 radio.addEventListener('change', handlePaymentMethodChange);
             });
+            document.getElementById('productSearch').addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                const filtered = products.filter(p => p.name.toLowerCase().includes(searchTerm));
+                displayProductGrid(filtered);
+            });
         });
-        
+
+        function getRandomFoodEmoji() {
+            const emojis = ['🍜', '🍛', '🍚', '🍝', '🍣', '🍔', '🍟', '🍕', '🌮', '🥗', '🍲', '🍤', '🍗', '🌶️', '🥤', '🍹', '☕'];
+            return emojis[Math.floor(Math.random() * emojis.length)];
+        }
+
         function handlePaymentMethodChange() {
             const isTransfer = document.getElementById('paymentTransfer').checked;
             if (isTransfer) {
@@ -498,7 +497,9 @@
             const data = { products, members, sales, announcements, timestamp: new Date().toISOString(), savedBy: currentUser };
             const callbackName = 'jsonpCallback_sync_' + Date.now();
             window[callbackName] = function(response) {
-                document.head.removeChild(script);
+                if (document.head.contains(script)) {
+                    document.head.removeChild(script);
+                }
                 delete window[callbackName];
                 if (!response.success) {
                     console.error("Auto-sync failed:", response.error);
@@ -509,7 +510,9 @@
             const params = new URLSearchParams({ action: 'save', data: JSON.stringify(data), callback: callbackName });
             script.src = `${GOOGLE_SHEETS_URL}?${params.toString()}`;
             script.onerror = () => {
-                document.head.removeChild(script);
+                 if (document.head.contains(script)) {
+                    document.head.removeChild(script);
+                }
                 delete window[callbackName];
                 console.error("Auto-sync failed: Network error");
                 showAlert('การซิงค์ข้อมูลล้มเหลว', 'error');
@@ -523,7 +526,9 @@
             }
             const callbackName = 'jsonpCallback_load_' + Date.now();
             window[callbackName] = function(response) {
-                document.head.removeChild(script);
+                if (document.head.contains(script)) {
+                    document.head.removeChild(script);
+                }
                 delete window[callbackName];
                 if (response.success && response.data) {
                     products = response.data.products || [];
@@ -548,7 +553,9 @@
             const params = new URLSearchParams({ action: 'load', callback: callbackName });
             script.src = `${GOOGLE_SHEETS_URL}?${params.toString()}`;
             script.onerror = function() {
-                document.head.removeChild(script);
+                if (document.head.contains(script)) {
+                    document.head.removeChild(script);
+                }
                 delete window[callbackName];
                  if (isManualRefresh) {
                     Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด!', text: 'ไม่สามารถเชื่อมต่อกับ Google Sheets ได้' });
@@ -568,6 +575,17 @@
             document.getElementById('mainApp').classList.remove('hidden');
             document.getElementById('currentUser').textContent = users[currentUser]?.name || currentUser;
             document.getElementById('currentRole').textContent = userRole === 'admin' ? 'ผู้ดูแลระบบ' : 'พนักงานขาย';
+            
+            // Role-specific UI adjustments
+            const memberSelectContainer = document.getElementById('memberSelectContainer');
+            if (memberSelectContainer) {
+                if (userRole === 'user') {
+                    memberSelectContainer.classList.add('hidden');
+                } else {
+                    memberSelectContainer.classList.remove('hidden');
+                }
+            }
+
             setupNavigation();
             showPage('home');
             
@@ -625,6 +643,7 @@
         function showPage(pageId) {
             document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
             document.getElementById(pageId + 'Page').classList.remove('hidden');
+            if(pageId === 'payment') displayProductGrid(); // Render grid when showing payment page
             if (pageId === 'salesHistory') updateMySalesHistory();
             if (pageId === 'salesReport') updateSalesReport();
         }
@@ -633,7 +652,14 @@
         document.getElementById('productForm').addEventListener('submit', function(e) {
             e.preventDefault();
             if (userRole !== 'admin') { showAlert('คุณไม่มีสิทธิ์', 'error'); return; }
-            const product = { name: document.getElementById('productName').value, description: document.getElementById('productDescription').value, price: parseFloat(document.getElementById('productPrice').value), stock: parseInt(document.getElementById('productStock').value), createdAt: new Date().toISOString(), createdBy: currentUser };
+            const product = { 
+                name: document.getElementById('productName').value, 
+                description: document.getElementById('productDescription').value, 
+                price: parseFloat(document.getElementById('productPrice').value), 
+                stock: parseInt(document.getElementById('productStock').value), 
+                createdAt: new Date().toISOString(), 
+                createdBy: currentUser 
+            };
             products.push(product);
             syncDataToGoogleSheets();
             Swal.fire({ icon: 'success', title: 'เพิ่มสินค้าสำเร็จ!', timer: 1500, showConfirmButton: false });
@@ -728,24 +754,15 @@
             });
         }
         
-        function addToCart() {
-            const productIndex = parseInt(document.getElementById('productSelect').value);
-            const quantity = parseInt(document.getElementById('quantity').value);
-
-            if (isNaN(productIndex) || !quantity || quantity <= 0) {
-                showAlert('กรุณาเลือกสินค้าและจำนวนให้ถูกต้อง', 'warning');
-                return;
-            }
-
+        function addToCartFromGrid(productIndex) {
             const product = products[productIndex];
-            if (!product) {
-                showAlert('ไม่พบสินค้าที่เลือก', 'error');
-                return;
-            }
-            
+            if (!product) { return; }
+
+            const quantity = 1;
             const existingCartQuantity = currentCart.find(item => item.productIndex === productIndex)?.quantity || 0;
+
             if (product.stock < (existingCartQuantity + quantity)) {
-                showAlert(`สินค้าไม่เพียงพอ! มีสินค้าเหลือเพียง ${product.stock} ชิ้น`, 'error');
+                showAlert(`สินค้าไม่เพียงพอ!`, 'error');
                 return;
             }
 
@@ -753,16 +770,11 @@
             if (existingItem) {
                 existingItem.quantity += quantity;
             } else {
-                currentCart.push({
-                    productIndex: productIndex,
-                    name: product.name,
-                    price: product.price,
-                    quantity: quantity
-                });
+                currentCart.push({ productIndex, name: product.name, price: product.price, quantity });
             }
 
+            showAlert(`เพิ่ม ${product.name}`, 'success');
             displayCart();
-            document.getElementById('quantity').value = 1;
         }
 
         function confirmPayment() {
@@ -779,8 +791,7 @@
             syncDataToGoogleSheets();
             Swal.fire({ icon: 'success', title: 'ชำระเงินสำเร็จ!', text: `เงินทอน: ฿${paid - total}`, timer: 2000, showConfirmButton: false });
             currentCart = [];
-            displayCart();
-            document.getElementById('paymentForm').reset();
+            document.getElementById('memberSelect').value = '';
             document.getElementById('paidAmount').value = '';
             document.getElementById('changeAmount').value = '';
             refreshUI();
@@ -790,12 +801,41 @@
         function refreshUI() {
             displayProducts();
             displayMembers();
-            loadProductOptions();
+            displayProductGrid();
             loadMemberOptions();
             updateDashboard();
             updateSalesReport();
             updateMySalesHistory();
             displayAnnouncements();
+            displayCart();
+        }
+
+        function displayProductGrid(filteredProducts = products) {
+            const grid = document.getElementById('productGrid');
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            filteredProducts.forEach(p => {
+                const productIndex = products.findIndex(prod => prod.name === p.name && prod.price === p.price);
+                if (p.stock > 0) {
+                    const card = document.createElement('div');
+                    card.className = 'bg-white p-3 rounded-lg shadow-md cursor-pointer hover:shadow-xl hover:border-orange-400 border-2 border-transparent transition-all';
+                    card.onclick = () => addToCartFromGrid(productIndex);
+
+                    card.innerHTML = `
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="font-bold text-gray-800 text-base leading-tight">${p.name}</h4>
+                            <span class="text-2xl">${getRandomFoodEmoji()}</span>
+                        </div>
+                        <p class="text-xs text-gray-500 mb-3 h-8 overflow-hidden">${p.description || ''}</p>
+                        <div class="flex justify-between items-end mt-2">
+                            <p class="text-lg font-bold text-orange-600">฿${p.price}</p>
+                            <p class="text-xs text-gray-500">คงเหลือ: ${p.stock}</p>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                }
+            });
         }
         
         function displayAnnouncements() {
@@ -862,16 +902,9 @@
             });
         }
 
-
-        function loadProductOptions() {
-            const select = document.getElementById('productSelect');
-            select.innerHTML = '<option value="">เลือกอาหาร</option>';
-            products.forEach((p, i) => { if (p.stock > 0) { const o = document.createElement('option'); o.value = i; o.textContent = `${p.name} - ฿${p.price}`; select.appendChild(o); } });
-        }
-
         function loadMemberOptions() {
             const select = document.getElementById('memberSelect');
-            select.innerHTML = '<option value="">เลือกสมาชิก</option>';
+            select.innerHTML = '<option value="">(ลูกค้าทั่วไป)</option>';
             members.forEach((m, i) => { const o = document.createElement('option'); o.value = i; o.textContent = `${m.firstName} ${m.lastName} (${m.employeeId})`; select.appendChild(o); });
         }
 
@@ -884,16 +917,19 @@
                 total += itemTotal;
                 const div = document.createElement('div');
                 div.className = 'p-3 bg-gray-50 rounded border flex justify-between items-center';
-                div.innerHTML = `<div><h4 class="font-medium">${item.name}</h4><p class="text-sm text-gray-600">฿${item.price} x ${item.quantity} = ฿${itemTotal}</p></div><button onclick="removeFromCart(${index})" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm flex-shrink-0">ลบ</button>`;
+                div.innerHTML = `<div><h4 class="font-medium">${item.name}</h4><p class="text-sm text-gray-600">฿${item.price} x ${item.quantity} = ฿${itemTotal}</p></div><button onclick="removeFromCart(${index})" class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs flex-shrink-0">ลบ</button>`;
                 cartDiv.appendChild(div);
             });
+            if (currentCart.length === 0) {
+                cartDiv.innerHTML = `<p class="text-center text-gray-500">ตะกร้าว่าง</p>`;
+            }
             document.getElementById('totalAmount').textContent = `฿${total}`;
             calculateChange();
             handlePaymentMethodChange(); 
         }
 
         function removeFromCart(index) { currentCart.splice(index, 1); displayCart(); }
-        function calculateChange() { const total = currentCart.reduce((sum, item) => sum + (item.price * item.quantity), 0); const paid = parseFloat(document.getElementById('paidAmount').value) || 0; const change = paid - total; document.getElementById('changeAmount').value = change >= 0 ? `฿${change}` : 'ไม่เพียงพอ'; }
+        function calculateChange() { const total = currentCart.reduce((sum, item) => sum + (item.price * item.quantity), 0); const paid = parseFloat(document.getElementById('paidAmount').value) || 0; const change = paid - total; document.getElementById('changeAmount').value = change >= 0 ? `฿${change.toFixed(2)}` : 'ไม่เพียงพอ'; }
         
         function updateDashboard() {
             const today = new Date().toDateString();
