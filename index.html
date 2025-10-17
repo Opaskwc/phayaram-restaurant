@@ -379,8 +379,8 @@
             'user': { password: 'user123', role: 'user', name: 'พนักงานขาย' }
         };
 
-        const GOOGLE_SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzXKaskLapX_vzRartmVX74x7vnpMhiyVK6Wk2WUbVdnKJQXNL_2unioutQFzMEBfxg/exec';
-        const GEMINI_API_KEY = '';
+        const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbzXKaskLapX_vzRartmVX74x7vnpMhiyVK6Wk2WUbVdnKJQXNL_2unioutQFzMEBfxg/exec";
+        const GEMINI_API_KEY = "";
         
         async function fetchWithRetry(url, options, maxRetries = 3) {
             for (let attempt = 0; attempt < maxRetries; attempt++) {
@@ -514,7 +514,7 @@
                 }
                 delete window[callbackName];
                 console.error("Auto-sync failed: Network error");
-                showAlert('การซิงค์ข้อมูลล้มเหลว', 'error');
+                showAlert('การซิงค์ข้อมูลล้มเหลว! โปรดตรวจสอบการตั้งค่า Deploy และ URL', 'error');
             };
             document.head.appendChild(script);
         }
