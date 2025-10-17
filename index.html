@@ -381,6 +381,56 @@
 
         const GOOGLE_SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzXKaskLapX_vzRartmVX74x7vnpMhiyVK6Wk2WUbVdnKJQXNL_2unioutQFzMEBfxg/exec';
         const GEMINI_API_KEY = '';
+
+        function callGoogleAppsScript(action, payload = null, { timeout = 15000 } = {}) {
+            return new Promise((resolve, reject) => {
+                if (!GOOGLE_SHEETS_URL) {
+                    reject(new Error('ไม่พบ URL ของ Google Apps Script'));
+                    return;
+                }
+
+                const callbackName = `jsonpCallback_${action}_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+                const params = new URLSearchParams({ action, callback: callbackName });
+                if (payload !== null && payload !== undefined) {
+                    params.set('data', JSON.stringify(payload));
+                }
+
+                const script = document.createElement('script');
+                let timeoutId = null;
+
+                const cleanup = () => {
+                    if (timeoutId) {
+                        clearTimeout(timeoutId);
+                    }
+                    if (script.parentNode) {
+                        script.parentNode.removeChild(script);
+                    }
+                    try {
+                        delete window[callbackName];
+                    } catch (err) {
+                        window[callbackName] = undefined;
+                    }
+                };
+
+                window[callbackName] = (response) => {
+                    cleanup();
+                    resolve(response);
+                };
+
+                script.src = `${GOOGLE_SHEETS_URL}?${params.toString()}`;
+                script.onerror = () => {
+                    cleanup();
+                    reject(new Error('ไม่สามารถเชื่อมต่อกับ Google Apps Script ได้'));
+                };
+
+                timeoutId = setTimeout(() => {
+                    cleanup();
+                    reject(new Error('หมดเวลารอการตอบกลับจาก Google Apps Script'));
+                }, timeout);
+
+                document.head.appendChild(script);
+            });
+        }
         
         async function fetchWithRetry(url, options, maxRetries = 3) {
             for (let attempt = 0; attempt < maxRetries; attempt++) {
@@ -490,79 +540,62 @@
         // --- DATA SYNCING ---
         function syncDataToGoogleSheets() {
             const data = { products, members, sales, announcements, timestamp: new Date().toISOString(), savedBy: currentUser };
-            const callbackName = 'jsonpCallback_sync_' + Date.now();
-            window[callbackName] = function(response) {
-                if (document.head.contains(script)) {
-                    document.head.removeChild(script);
-                }
-                delete window[callbackName];
-                if (!response.success) {
-                    console.error("Auto-sync failed:", response.error);
-                    showAlert('การซิงค์ข้อมูลล้มเหลว', 'error');
-                }
-            };
-            const script = document.createElement('script');
-            const params = new URLSearchParams({ action: 'save', data: JSON.stringify(data), callback: callbackName });
-            
-            const fullUrl = `${GOOGLE_SHEETS_URL}?${params.toString()}`;
-            console.log("Attempting to sync with URL:", fullUrl); // This will show the exact URL being called in the F12 Console
-            
-            script.src = fullUrl;
-            script.onerror = () => {
-                 if (document.head.contains(script)) {
-                    document.head.removeChild(script);
-                }
-                delete window[callbackName];
-                console.error("Auto-sync failed: Network error");
-                showAlert('การซิงค์ข้อมูลล้มเหลว! โปรดตรวจสอบการตั้งค่า Deploy และ URL', 'error');
-            };
-            document.head.appendChild(script);
+            callGoogleAppsScript('save', data)
+                .then((response) => {
+                    if (!response?.success) {
+                        console.error('Auto-sync failed:', response?.error);
+                        showAlert('การซิงค์ข้อมูลล้มเหลว', 'error');
+                    }
+                })
+                .catch((error) => {
+                    console.error('Auto-sync failed:', error);
+                    showAlert('การซิงค์ข้อมูลล้มเหลว! โปรดตรวจสอบการตั้งค่า Deploy และ URL', 'error');
+                });
         }
 
         function loadFromGoogleSheets(isManualRefresh = false) {
+            const showLoading = () => Swal.fire({ title: 'กำลังโหลดข้อมูล...', text: 'กรุณารอสักครู่', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
+            const hideLoading = () => { if (Swal.isLoading()) Swal.close(); };
+
             if (isManualRefresh) {
-                Swal.fire({ title: 'กำลังโหลดข้อมูล...', text: 'กรุณารอสักครู่', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
+                showLoading();
             }
-            const callbackName = 'jsonpCallback_load_' + Date.now();
-            window[callbackName] = function(response) {
-                if (document.head.contains(script)) {
-                    document.head.removeChild(script);
-                }
-                delete window[callbackName];
-                if (response.success && response.data) {
-                    products = response.data.products || [];
-                    members = response.data.members || [];
-                    sales = response.data.sales || [];
-                    if (response.data.announcements) {
-                        announcements = response.data.announcements;
-                    }
-                    refreshUI();
-                    if (isManualRefresh) {
-                        Swal.fire({ icon: 'success', title: 'โหลดข้อมูลสำเร็จ!', timer: 1500, showConfirmButton: false });
-                    }
-                } else {
-                    if (isManualRefresh) {
-                        Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด!', text: response.error || 'ไม่สามารถโหลดข้อมูลได้' });
+
+            callGoogleAppsScript('load')
+                .then((response) => {
+                    if (response?.success && response?.data) {
+                        products = response.data.products || [];
+                        members = response.data.members || [];
+                        sales = response.data.sales || [];
+                        if (response.data.announcements) {
+                            announcements = response.data.announcements;
+                        }
+                        refreshUI();
+                        if (isManualRefresh) {
+                            Swal.fire({ icon: 'success', title: 'โหลดข้อมูลสำเร็จ!', timer: 1500, showConfirmButton: false });
+                        }
                     } else {
-                        showAlert('ไม่สามารถโหลดข้อมูลเริ่มต้นได้', 'error');
+                        const errorMessage = response?.error || 'ไม่สามารถโหลดข้อมูลได้';
+                        if (isManualRefresh) {
+                            Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด!', text: errorMessage });
+                        } else {
+                            showAlert('ไม่สามารถโหลดข้อมูลเริ่มต้นได้', 'error');
+                        }
                     }
-                }
-            };
-            const script = document.createElement('script');
-            const params = new URLSearchParams({ action: 'load', callback: callbackName });
-            script.src = `${GOOGLE_SHEETS_URL}?${params.toString()}`;
-            script.onerror = function() {
-                if (document.head.contains(script)) {
-                    document.head.removeChild(script);
-                }
-                delete window[callbackName];
-                 if (isManualRefresh) {
-                    Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด!', text: 'ไม่สามารถเชื่อมต่อกับ Google Sheets ได้' });
-                } else {
-                    showAlert('ไม่สามารถเชื่อมต่อฐานข้อมูลได้', 'error');
-                }
-            };
-            document.head.appendChild(script);
+                })
+                .catch((error) => {
+                    console.error('Load data failed:', error);
+                    if (isManualRefresh) {
+                        Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด!', text: 'ไม่สามารถเชื่อมต่อกับ Google Sheets ได้' });
+                    } else {
+                        showAlert('ไม่สามารถเชื่อมต่อฐานข้อมูลได้', 'error');
+                    }
+                })
+                .finally(() => {
+                    if (isManualRefresh) {
+                        hideLoading();
+                    }
+                });
         }
 
         // --- AUTH & UI FLOW ---
