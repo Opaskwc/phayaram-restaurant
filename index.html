@@ -561,7 +561,7 @@
                 showLoading();
             }
 
-            callGoogleAppsScript('load')
+            return callGoogleAppsScript('load')
                 .then((response) => {
                     if (response?.success && response?.data) {
                         products = response.data.products || [];
@@ -622,10 +622,25 @@
             showPage('home');
             
             Swal.fire({ title: 'กำลังโหลดข้อมูลเริ่มต้น...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-            loadFromGoogleSheets(); // Load data from Sheets on login
-            Swal.close();
-            
-            if (window.applyDesktopSidebarState) window.applyDesktopSidebarState();
+            const loadPromise = loadFromGoogleSheets(); // Load data from Sheets on login
+
+            if (loadPromise?.finally) {
+                loadPromise.finally(() => {
+                    if (Swal.isLoading()) {
+                        Swal.close();
+                    }
+                    if (window.applyDesktopSidebarState) {
+                        window.applyDesktopSidebarState();
+                    }
+                });
+            } else {
+                if (Swal.isLoading()) {
+                    Swal.close();
+                }
+                if (window.applyDesktopSidebarState) {
+                    window.applyDesktopSidebarState();
+                }
+            }
         }
 
         document.getElementById('loginForm').addEventListener('submit', function(e) {
